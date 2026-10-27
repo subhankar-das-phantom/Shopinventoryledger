@@ -12,8 +12,11 @@ import {
   History,
   ArrowUpDown,
   RefreshCw,
-  Package
+  Package,
+  X
 } from 'lucide-react';
+
+import { useDebounce } from '../hooks/index.js';
 
 interface ProductsPageProps {
   onSelectProduct: (productId: string) => void;
@@ -32,8 +35,9 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters
+  // Filters & Debounced Search
   const [search, setSearch] = useState('');
+  const [debouncedSearch, flushSearch] = useDebounce(search, 350);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('active');
   const [page, setPage] = useState(1);
@@ -53,7 +57,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
         status: selectedStatus,
         category: selectedCategory
       });
-      if (search.trim()) params.append('search', search.trim());
+      if (debouncedSearch.trim()) params.append('search', debouncedSearch.trim());
 
       const res = await api.get(`/products?${params.toString()}`);
       if (res.data.success) {
@@ -69,13 +73,16 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
   };
 
   useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  useEffect(() => {
     fetchProducts();
-  }, [page, selectedStatus, selectedCategory]);
+  }, [page, selectedStatus, selectedCategory, debouncedSearch]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setPage(1);
-    fetchProducts();
+    flushSearch();
   };
 
   const handleConfirmDeactivation = async () => {
@@ -128,8 +135,21 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by product name or SKU..."
-            className="w-full bg-slate-800 border border-slate-700 pl-9 pr-3 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
+            className="w-full bg-slate-800 border border-slate-700 pl-9 pr-9 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch('');
+                flushSearch();
+              }}
+              className="absolute right-2.5 top-2.5 p-0.5 text-slate-400 hover:text-white rounded"
+              title="Clear search"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </form>
 
         <div className="flex flex-wrap items-center gap-2.5">

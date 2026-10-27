@@ -1,8 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext.js';
 import { api, extractErrorMessage, createIdempotencyKey } from '../api/client.js';
 import { Product, MovementType } from '../types/index.js';
-import { X, AlertCircle, CheckCircle, ArrowDownLeft, ArrowUpRight, RotateCcw, SlidersHorizontal, Loader2 } from 'lucide-react';
+import { useDebounce } from '../hooks/index.js';
+import {
+  X,
+  AlertCircle,
+  CheckCircle,
+  ArrowDownLeft,
+  ArrowUpRight,
+  RotateCcw,
+  SlidersHorizontal,
+  Loader2,
+  Search,
+  Check,
+  Package
+} from 'lucide-react';
 
 interface RecordMovementModalProps {
   isOpen: boolean;
@@ -20,48 +33,105 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
   initialType = 'SALE_OUT'
 }) => {
   const { isOwner } = useAuth();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(false);
 
+  // Selected product & movement form states
   const [selectedProductId, setSelectedProductId] = useState(initialProductId || '');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [movementType, setMovementType] = useState<MovementType>(initialType);
   const [quantity, setQuantity] = useState<string>('1');
   const [reason, setReason] = useState<string>('');
   const [reference, setReference] = useState<string>('');
 
+  // Search-based product selection combobox states
+  const [productSearchText, setProductSearchText] = useState<string>('');
+  const [debouncedProductSearch] = useDebounce(productSearchText, 300);
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const latestSearchRequestId = useRef<number>(0);
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Load products when modal opens
+  // Close search dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Modal open initialization
   useEffect(() => {
     if (isOpen) {
-      fetchProducts();
-      if (initialProductId) setSelectedProductId(initialProductId);
-      if (initialType) setMovementType(initialType);
       setError(null);
       setSuccessMessage(null);
+      setProductSearchText('');
+      setQuantity('1');
+      setReason('');
+      setReference('');
+      if (initialType) setMovementType(initialType);
+
+      if (initialProductId) {
+        setSelectedProductId(initialProductId);
+        // Load details of the pre-selected product
+        api.get(`/products/${initialProductId}`)
+          .then((res) => {
+            if (res.data.success) {
+              setSelectedProduct(res.data.data);
+              setIsDropdownOpen(false);
+            }
+          })
+          .catch((err) => {
+            console.error('Failed to load initial product:', err);
+          });
+      } else {
+        setSelectedProductId('');
+        setSelectedProduct(null);
+        setIsDropdownOpen(true);
+      }
     }
   }, [isOpen, initialProductId, initialType]);
 
-  const fetchProducts = async () => {
-    setLoadingProducts(true);
-    try {
-      const res = await api.get('/products?status=active&limit=100');
-      if (res.data.success) {
-        setProducts(res.data.data);
-        if (!selectedProductId && res.data.data.length > 0) {
-          setSelectedProductId(res.data.data[0]._id);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load products for modal:', err);
-    } finally {
-      setLoadingProducts(false);
-    }
-  };
+  // Debounced product search query
+  useEffect(() => {
+    if (!isOpen) return;
 
-  const selectedProduct = products.find((p) => p._id === selectedProductId);
+    const query = debouncedProductSearch.trim();
+    const requestId = ++latestSearchRequestId.current;
+    setIsSearching(true);
+
+    const params = new URLSearchParams({
+      status: 'active',
+      limit: '8'
+    });
+    if (query) {
+      params.append('search', query);
+    }
+
+    api.get(`/products?${params.toString()}`)
+      .then((res) => {
+        if (latestSearchRequestId.current !== requestId) return;
+        if (res.data.success) {
+          setSearchResults(res.data.data || []);
+        }
+      })
+      .catch((err) => {
+        if (latestSearchRequestId.current !== requestId) return;
+        console.error('Product search error:', err);
+        setSearchResults([]);
+      })
+      .finally(() => {
+        if (latestSearchRequestId.current === requestId) {
+          setIsSearching(false);
+        }
+      });
+  }, [debouncedProductSearch, isOpen]);
 
   // Available movement types based on user role
   const availableTypes: { type: MovementType; label: string; icon: any; color: string }[] = [
@@ -96,15 +166,25 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
     setError(null);
     setSuccessMessage(null);
 
+    if (!selectedProductId || !selectedProduct) {
+      setError('Please search and select a product.');
+      return;
+    }
+
     const numQty = parseFloat(quantity);
     if (isNaN(numQty) || numQty <= 0) {
       setError('Quantity must be a positive number greater than 0.');
       return;
     }
 
-    if (!selectedProductId) {
-      setError('Please select a product.');
-      return;
+    // Guard against overt overselling attempts on outward transactions
+    if ((movementType === 'SALE_OUT' || movementType === 'ADJUSTMENT_OUT') && selectedProduct) {
+      if (numQty > selectedProduct.currentStock) {
+        setError(
+          `Insufficient stock: ${numQty} ${selectedProduct.unit} requested, but only ${selectedProduct.currentStock} ${selectedProduct.unit} available in physical stock.`
+        );
+        return;
+      }
     }
 
     if (!reason.trim()) {
@@ -146,7 +226,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
         setTimeout(() => {
           onSuccess();
           onClose();
-        }, 1200);
+        }, 1100);
       }
     } catch (err: any) {
       setError(extractErrorMessage(err));
@@ -219,35 +299,162 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
             </div>
           </div>
 
-          {/* Product Selection */}
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Product <span className="text-rose-400">*</span>
-            </label>
-            {loadingProducts ? (
-              <div className="text-xs text-slate-400">Loading catalog...</div>
-            ) : (
-              <select
-                value={selectedProductId}
-                onChange={(e) => setSelectedProductId(e.target.value)}
-                required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
-              >
-                {products.map((p) => (
-                  <option key={p._id} value={p._id}>
-                    [{p.sku}] {p.name} — Current: {p.currentStock} {p.unit}
-                  </option>
-                ))}
-              </select>
-            )}
+          {/* Product Selection: Debounced Search Combobox */}
+          <div ref={searchContainerRef} className="relative">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-medium text-slate-300">
+                Product <span className="text-rose-400">*</span>
+              </label>
+              {selectedProduct && !isDropdownOpen && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsDropdownOpen(true);
+                    setProductSearchText('');
+                  }}
+                  className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition-colors"
+                >
+                  <Search className="w-3 h-3" />
+                  <span>Change Product</span>
+                </button>
+              )}
+            </div>
 
-            {/* Product Stock Preview Pill */}
-            {selectedProduct && (
-              <div className="mt-1.5 flex items-center justify-between text-xs text-slate-400 bg-slate-800/40 px-3 py-1.5 rounded-lg border border-slate-800">
-                <span>Available Balance:</span>
-                <span className="font-mono font-bold text-slate-200">
-                  {selectedProduct.currentStock} {selectedProduct.unit}
-                </span>
+            {/* Selected Product Card (When chosen and dropdown is closed) */}
+            {selectedProduct && !isDropdownOpen ? (
+              <div
+                onClick={() => setIsDropdownOpen(true)}
+                className="p-3 rounded-xl bg-slate-800/80 border border-blue-500/40 hover:border-blue-500/60 transition cursor-pointer flex items-center justify-between group shadow-sm shadow-blue-500/10"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+                    <Package className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-slate-100 text-sm truncate group-hover:text-blue-300 transition-colors">
+                      {selectedProduct.name}
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
+                      <span className="font-mono bg-slate-900/60 px-1.5 py-0.2 rounded border border-slate-700/60 text-slate-300">
+                        {selectedProduct.sku}
+                      </span>
+                      <span>•</span>
+                      <span>{selectedProduct.category}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="text-right">
+                    <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Stock Balance</div>
+                    <div className={`font-mono font-bold text-sm ${
+                      selectedProduct.currentStock <= selectedProduct.lowStockThreshold
+                        ? selectedProduct.currentStock === 0
+                          ? 'text-rose-400'
+                          : 'text-amber-400'
+                        : 'text-emerald-400'
+                    }`}>
+                      {selectedProduct.currentStock} {selectedProduct.unit}
+                    </div>
+                  </div>
+                  <div className="p-1 rounded text-slate-500 group-hover:text-slate-300 transition">
+                    <Check className="w-4 h-4 text-blue-400" />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Search Input with Autocomplete Dropdown */
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                <input
+                  type="text"
+                  autoFocus={!selectedProduct}
+                  value={productSearchText}
+                  onChange={(e) => {
+                    setProductSearchText(e.target.value);
+                    setIsDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsDropdownOpen(true)}
+                  placeholder="Type product name or SKU to search..."
+                  className="w-full bg-slate-800 border border-slate-700 pl-9 pr-9 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
+                />
+
+                {productSearchText && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProductSearchText('');
+                    }}
+                    className="absolute right-2.5 top-2.5 p-0.5 text-slate-400 hover:text-white rounded"
+                    title="Clear search"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+
+                {/* Floating Autocomplete Dropdown */}
+                {isDropdownOpen && (
+                  <div className="absolute left-0 right-0 z-50 mt-1.5 bg-[#121316] border border-slate-700/80 rounded-xl shadow-2xl max-h-56 overflow-y-auto divide-y divide-slate-800/80">
+                    {isSearching ? (
+                      <div className="px-4 py-3 text-xs text-slate-400 flex items-center gap-2">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" />
+                        <span>Searching catalog...</span>
+                      </div>
+                    ) : searchResults.length === 0 ? (
+                      <div className="px-4 py-4 text-xs text-slate-400 text-center">
+                        No active products found matching &ldquo;{productSearchText}&rdquo;
+                      </div>
+                    ) : (
+                      searchResults.map((p) => {
+                        const isChosen = selectedProductId === p._id;
+                        return (
+                          <div
+                            key={p._id}
+                            onClick={() => {
+                              setSelectedProductId(p._id);
+                              setSelectedProduct(p);
+                              setIsDropdownOpen(false);
+                              setProductSearchText('');
+                            }}
+                            className={`p-2.5 flex items-center justify-between cursor-pointer transition hover:bg-slate-800/80 ${
+                              isChosen ? 'bg-blue-500/10' : ''
+                            }`}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-slate-200 text-xs truncate">
+                                  {p.name}
+                                </span>
+                                {isChosen && (
+                                  <span className="text-[10px] px-1 rounded bg-blue-500/20 text-blue-300 font-semibold">
+                                    Selected
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400 font-mono">
+                                <span className="text-slate-300">{p.sku}</span>
+                                <span>•</span>
+                                <span className="font-sans text-slate-500">{p.category}</span>
+                              </div>
+                            </div>
+
+                            <div className="ml-3 shrink-0 text-right">
+                              <span className={`inline-flex items-center gap-1 font-mono text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                                p.currentStock <= p.lowStockThreshold
+                                  ? p.currentStock === 0
+                                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                                    : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                                  : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                              }`}>
+                                {p.currentStock} {p.unit}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

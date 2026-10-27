@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api, extractErrorMessage } from '../api/client.js';
-import { StockMovement } from '../types/index.js';
+import { StockMovement, Product } from '../types/index.js';
 import { MovementTypeBadge } from '../components/Badge.js';
+import { useDebounce } from '../hooks/index.js';
 import {
-  History,
   RefreshCw,
-  User as UserIcon
+  User as UserIcon,
+  Search,
+  X,
+  Loader2
 } from 'lucide-react';
 
 export const MovementsPage: React.FC = () => {
@@ -21,6 +24,55 @@ export const MovementsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalMovements, setTotalMovements] = useState(0);
 
+  // Debounced Product Filter
+  const [productSearchText, setProductSearchText] = useState<string>('');
+  const [debouncedProductSearch] = useDebounce(productSearchText, 300);
+  const [selectedProductId, setSelectedProductId] = useState<string>('');
+  const [selectedProductName, setSelectedProductName] = useState<string>('');
+  const [productResults, setProductResults] = useState<Product[]>([]);
+  const [isSearchingProduct, setIsSearchingProduct] = useState<boolean>(false);
+  const [showProductDropdown, setShowProductDropdown] = useState<boolean>(false);
+  const productSearchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close product search dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        productSearchContainerRef.current &&
+        !productSearchContainerRef.current.contains(e.target as Node)
+      ) {
+        setShowProductDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Fetch product search results for filter dropdown
+  useEffect(() => {
+    const query = debouncedProductSearch.trim();
+    if (!query) {
+      setProductResults([]);
+      setIsSearchingProduct(false);
+      return;
+    }
+
+    setIsSearchingProduct(true);
+    api.get(`/products?status=active&search=${encodeURIComponent(query)}&limit=6`)
+      .then((res) => {
+        if (res.data.success) {
+          setProductResults(res.data.data || []);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to search products in movements:', err);
+        setProductResults([]);
+      })
+      .finally(() => {
+        setIsSearchingProduct(false);
+      });
+  }, [debouncedProductSearch]);
+
   const fetchMovements = async () => {
     setLoading(true);
     setError(null);
@@ -30,6 +82,7 @@ export const MovementsPage: React.FC = () => {
         limit: '20'
       });
       if (selectedType !== 'all') params.append('type', selectedType);
+      if (selectedProductId) params.append('productId', selectedProductId);
       if (dateFrom) params.append('dateFrom', dateFrom);
       if (dateTo) params.append('dateTo', dateTo);
 
@@ -48,7 +101,17 @@ export const MovementsPage: React.FC = () => {
 
   useEffect(() => {
     fetchMovements();
-  }, [page, selectedType, dateFrom, dateTo]);
+  }, [page, selectedType, selectedProductId, dateFrom, dateTo]);
+
+  const handleResetFilters = () => {
+    setSelectedType('all');
+    setSelectedProductId('');
+    setSelectedProductName('');
+    setProductSearchText('');
+    setDateFrom('');
+    setDateTo('');
+    setPage(1);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -77,9 +140,84 @@ export const MovementsPage: React.FC = () => {
 
       {/* Filter Toolbar */}
       <div className="bg-slate-800/40 border border-slate-800 p-4 rounded-xl flex flex-wrap items-center gap-3">
+        {/* Debounced Product Search Filter */}
+        <div ref={productSearchContainerRef} className="relative w-full sm:w-64">
+          <label className="block text-[11px] font-semibold text-slate-400 mb-1">Filter by Product:</label>
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5 pointer-events-none" />
+            <input
+              type="text"
+              value={selectedProductName || productSearchText}
+              onChange={(e) => {
+                setSelectedProductName('');
+                setSelectedProductId('');
+                setProductSearchText(e.target.value);
+                setShowProductDropdown(true);
+                setPage(1);
+              }}
+              onFocus={() => setShowProductDropdown(true)}
+              placeholder="Search product / SKU..."
+              className="w-full bg-slate-800 border border-slate-700 pl-8 pr-8 py-1.5 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
+            />
+            {(productSearchText || selectedProductId) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedProductId('');
+                  setSelectedProductName('');
+                  setProductSearchText('');
+                  setShowProductDropdown(false);
+                  setPage(1);
+                }}
+                className="absolute right-2 top-2 p-0.5 text-slate-400 hover:text-white"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {/* Dropdown list */}
+            {showProductDropdown && (productSearchText.trim().length > 0 || isSearchingProduct) && (
+              <div className="absolute left-0 right-0 z-50 mt-1 bg-[#121316] border border-slate-700/80 rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-800 text-xs">
+                {isSearchingProduct ? (
+                  <div className="p-3 text-slate-400 flex items-center gap-2">
+                    <Loader2 className="w-3 h-3 animate-spin text-blue-400" />
+                    <span>Searching catalog...</span>
+                  </div>
+                ) : productResults.length === 0 ? (
+                  <div className="p-3 text-slate-500 text-center">
+                    No products found
+                  </div>
+                ) : (
+                  productResults.map((p) => (
+                    <div
+                      key={p._id}
+                      onClick={() => {
+                        setSelectedProductId(p._id);
+                        setSelectedProductName(p.name);
+                        setProductSearchText('');
+                        setShowProductDropdown(false);
+                        setPage(1);
+                      }}
+                      className="p-2.5 hover:bg-slate-800 cursor-pointer flex items-center justify-between"
+                    >
+                      <div className="truncate mr-2">
+                        <span className="font-semibold text-slate-200">{p.name}</span>
+                        <span className="text-[10px] text-slate-400 font-mono ml-1.5">[{p.sku}]</span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-mono shrink-0">
+                        {p.currentStock} {p.unit}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Movement Type Filter */}
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-slate-400">Type:</label>
+        <div>
+          <label className="block text-[11px] font-semibold text-slate-400 mb-1">Type:</label>
           <select
             value={selectedType}
             onChange={(e) => {
@@ -98,8 +236,8 @@ export const MovementsPage: React.FC = () => {
         </div>
 
         {/* Date Filters */}
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-slate-400">From:</label>
+        <div>
+          <label className="block text-[11px] font-semibold text-slate-400 mb-1">From:</label>
           <input
             type="date"
             value={dateFrom}
@@ -111,8 +249,8 @@ export const MovementsPage: React.FC = () => {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-slate-400">To:</label>
+        <div>
+          <label className="block text-[11px] font-semibold text-slate-400 mb-1">To:</label>
           <input
             type="date"
             value={dateTo}
@@ -124,130 +262,123 @@ export const MovementsPage: React.FC = () => {
           />
         </div>
 
-        {(selectedType !== 'all' || dateFrom || dateTo) && (
+        {(selectedType !== 'all' || selectedProductId || dateFrom || dateTo) && (
           <button
-            onClick={() => {
-              setSelectedType('all');
-              setDateFrom('');
-              setDateTo('');
-              setPage(1);
-            }}
-            className="text-xs text-slate-400 hover:text-white underline ml-auto"
+            onClick={handleResetFilters}
+            className="text-xs text-rose-400 hover:text-rose-300 font-medium underline sm:self-end sm:mb-1.5 ml-auto"
           >
             Reset Filters
           </button>
         )}
       </div>
 
-      {/* Ledger Table */}
+      {/* Movements Table */}
       <div className="bg-slate-800/40 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
         {loading && movements.length === 0 ? (
-          <div className="py-16 text-center text-slate-400 text-sm">Loading ledger history...</div>
+          <div className="py-16 text-center text-slate-400 text-sm">Loading audit ledger...</div>
         ) : movements.length === 0 ? (
-          <div className="py-16 text-center text-slate-400 text-sm flex flex-col items-center">
-            <History className="w-10 h-10 text-slate-600 mb-3" />
-            <div className="font-medium text-slate-300 text-base">No movement records found</div>
-            <div className="text-xs text-slate-500 mt-1">
-              No transactions match your selected filter criteria.
-            </div>
+          <div className="py-16 text-center text-slate-400 text-sm">
+            No movements found matching the active filter criteria.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
                 <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider">
-                  <th className="py-3 px-4 font-semibold">Date & Time</th>
+                  <th className="py-3 px-4 font-semibold">Timestamp</th>
                   <th className="py-3 px-4 font-semibold">Product</th>
                   <th className="py-3 px-4 font-semibold">Movement Type</th>
-                  <th className="py-3 px-4 font-semibold">Magnitude</th>
+                  <th className="py-3 px-4 font-semibold">Quantity</th>
                   <th className="py-3 px-4 font-semibold">Reason</th>
                   <th className="py-3 px-4 font-semibold">Reference</th>
-                  <th className="py-3 px-4 font-semibold">Logged By</th>
+                  <th className="py-3 px-4 font-semibold">Recorded By</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
-                {movements.map((mov) => (
-                  <tr key={mov._id} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="py-3 px-4 text-xs text-slate-300 font-mono whitespace-nowrap">
-                      {new Date(mov.movementDate || mov.createdAt).toLocaleString(undefined, {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </td>
+                {movements.map((m) => {
+                  const prod = m.product;
+                  const actor = m.actor;
+                  const dateStr = new Date(m.movementDate).toLocaleString('en-IN', {
+                    dateStyle: 'short',
+                    timeStyle: 'medium'
+                  });
 
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-slate-200">
-                        {mov.product?.name || 'Unknown Product'}
-                      </div>
-                      <div className="text-xs text-slate-500 font-mono">
-                        {mov.product?.sku}
-                      </div>
-                    </td>
+                  return (
+                    <tr key={m._id} className="hover:bg-slate-800/30 transition-colors">
+                      <td className="py-3 px-4 text-xs font-mono text-slate-400 whitespace-nowrap">
+                        {dateStr}
+                      </td>
 
-                    <td className="py-3 px-4">
-                      <MovementTypeBadge type={mov.type} />
-                    </td>
+                      <td className="py-3 px-4">
+                        {prod ? (
+                          <div>
+                            <span className="font-medium text-slate-200">{prod.name}</span>
+                            <span className="text-xs text-slate-500 font-mono ml-1.5">[{prod.sku}]</span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-500 font-mono">
+                            {String(m.productId)}
+                          </span>
+                        )}
+                      </td>
 
-                    <td className="py-3 px-4 font-mono font-semibold whitespace-nowrap">
-                      <span
-                        className={
-                          mov.direction === 'IN' ? 'text-emerald-400' : 'text-rose-400'
-                        }
-                      >
-                        {mov.direction === 'IN' ? '+' : '-'}
-                        {mov.quantity} {mov.product?.unit || 'units'}
-                      </span>
-                    </td>
+                      <td className="py-3 px-4">
+                        <MovementTypeBadge type={m.type} direction={m.direction} />
+                      </td>
 
-                    <td className="py-3 px-4 text-xs text-slate-300 max-w-xs truncate">
-                      {mov.reason}
-                    </td>
-
-                    <td className="py-3 px-4 text-xs font-mono text-slate-400">
-                      {mov.reference ? (
-                        <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700/50">
-                          {mov.reference}
+                      <td className="py-3 px-4 font-mono font-semibold text-slate-200">
+                        <span className={m.direction === 'IN' ? 'text-emerald-400' : 'text-rose-400'}>
+                          {m.direction === 'IN' ? '+' : '-'}{m.quantity} {prod?.unit || ''}
                         </span>
-                      ) : (
-                        <span className="text-slate-600">—</span>
-                      )}
-                    </td>
+                      </td>
 
-                    <td className="py-3 px-4 text-xs text-slate-300 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        <UserIcon className="w-3.5 h-3.5 text-slate-500" />
-                        <span>{mov.actor?.name || 'System'}</span>
-                        <span className="text-[10px] text-slate-500">({mov.actor?.role})</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      <td className="py-3 px-4 text-slate-300 text-xs max-w-xs truncate" title={m.reason}>
+                        {m.reason}
+                      </td>
+
+                      <td className="py-3 px-4 text-slate-400 text-xs font-mono">
+                        {m.reference ? (
+                          <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700/50">
+                            {m.reference}
+                          </span>
+                        ) : (
+                          <span className="text-slate-600">—</span>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-4 text-slate-400 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <UserIcon className="w-3.5 h-3.5 text-slate-500" />
+                          <span>{actor?.name || 'System'}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
 
-        {/* Bounded Pagination Footer */}
+        {/* Pagination Footer */}
         {totalPages > 1 && (
-          <div className="p-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 bg-slate-900/40">
-            <span>
-              Showing Page {page} of {totalPages} ({totalMovements} total ledger records)
-            </span>
-            <div className="flex gap-1.5">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800 bg-slate-900/40 text-xs text-slate-400">
+            <div>
+              Showing page <span className="font-semibold text-slate-200">{page}</span> of{' '}
+              <span className="font-semibold text-slate-200">{totalPages}</span> ({totalMovements} records)
+            </div>
+            <div className="flex items-center gap-2">
               <button
                 disabled={page <= 1}
-                onClick={() => setPage((p) => p - 1)}
-                className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 transition"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300"
               >
                 Previous
               </button>
               <button
                 disabled={page >= totalPages}
-                onClick={() => setPage((p) => p + 1)}
-                className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 transition"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                className="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300"
               >
                 Next
               </button>
