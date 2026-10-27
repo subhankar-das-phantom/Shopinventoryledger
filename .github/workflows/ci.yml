@@ -1,15 +1,70 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
     branches: [ master, main ]
   pull_request:
     branches: [ master, main ]
+  workflow_dispatch:
 
 jobs:
-  backend-test:
-    name: Backend Tests & Parity Audit
+  test:
+    name: Backend Tests & Frontend Build
     runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install Backend Dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Run Backend Automated Test Suite (23 Tests)
+        working-directory: backend
+        env:
+          NODE_ENV: test
+          PORT: 5000
+          MONGODB_URI: mongodb://localhost:27017/shop_ledger_test
+          JWT_SECRET: ci_test_super_secret_jwt_key_must_be_at_least_32_characters
+          JWT_EXPIRES_IN: 7d
+        run: npm test
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Verify Frontend TypeScript & Production Build
+        working-directory: frontend
+        run: npm run build
+
+  deploy-development:
+    name: Deploy & Parity Audit (development)
+    needs: [test]
+    runs-on: ubuntu-latest
+    environment:
+      name: development
+      url: ${{ vars.FRONTEND_URL || 'http://localhost:5173' }}
 
     services:
       mongodb:
@@ -37,50 +92,20 @@ jobs:
         working-directory: backend
         run: npm ci
 
-      - name: Run Backend Automated Test Suite (23 Tests)
+      - name: Seed Demo Ledger in Development Environment
         working-directory: backend
         env:
-          NODE_ENV: test
-          PORT: 5000
-          MONGODB_URI: mongodb://localhost:27017/shop_ledger_test
-          JWT_SECRET: ci_test_super_secret_jwt_key_must_be_at_least_32_characters
-          JWT_EXPIRES_IN: 7d
-        run: npm test
-
-      - name: Seed Database for Parity Audit
-        working-directory: backend
-        env:
-          NODE_ENV: development
-          MONGODB_URI: mongodb://localhost:27017/shop_ledger_test
-          JWT_SECRET: ci_test_super_secret_jwt_key_must_be_at_least_32_characters
+          NODE_ENV: ${{ vars.NODE_ENV != '' && vars.NODE_ENV || 'development' }}
+          PORT: ${{ vars.PORT != '' && vars.PORT || '5000' }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI != '' && secrets.MONGODB_URI || 'mongodb://localhost:27017/shop_inventory_ledger' }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET != '' && secrets.JWT_SECRET || 'dev_environment_default_jwt_secret_must_be_32_chars_long' }}
         run: npm run seed
 
-      - name: Run Ledger Parity Audit (Domain Invariant Check)
+      - name: Run Authoritative Parity Audit (Double-Entry Invariant Check)
         working-directory: backend
         env:
-          NODE_ENV: development
-          MONGODB_URI: mongodb://localhost:27017/shop_ledger_test
+          NODE_ENV: ${{ vars.NODE_ENV != '' && vars.NODE_ENV || 'development' }}
+          PORT: ${{ vars.PORT != '' && vars.PORT || '5000' }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI != '' && secrets.MONGODB_URI || 'mongodb://localhost:27017/shop_inventory_ledger' }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET != '' && secrets.JWT_SECRET || 'dev_environment_default_jwt_secret_must_be_32_chars_long' }}
         run: npm run verify
-
-  frontend-build:
-    name: Frontend Build & Typecheck
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install Frontend Dependencies
-        working-directory: frontend
-        run: npm ci
-
-      - name: Verify TypeScript & Build Bundle
-        working-directory: frontend
-        run: npm run build

@@ -1,6 +1,6 @@
 # Shop Inventory Ledger
 
-[![CI Pipeline](https://github.com/subhankarmusic/Shopinventoryledger/actions/workflows/ci.yml/badge.svg)](https://github.com/subhankarmusic/Shopinventoryledger/actions/workflows/ci.yml)
+[![CI Pipeline](https://github.com/subhankar-das-phantom/Shopinventoryledger/actions/workflows/ci.yml/badge.svg)](https://github.com/subhankar-das-phantom/Shopinventoryledger/actions/workflows/ci.yml)
 [![Backend Tests](https://img.shields.io/badge/Backend%20Tests-23%20Passed-emerald.svg)](#automated-tests-and-ci-pipeline)
 [![Ledger Parity](https://img.shields.io/badge/Ledger%20Parity-100%25%20Verified-blue.svg)](#data-model-and-main-design-decisions)
 [![Concurrency Guard](https://img.shields.io/badge/Concurrency-Race--Free%20Guarded%20Atomic-purple.svg)](#data-model-and-main-design-decisions)
