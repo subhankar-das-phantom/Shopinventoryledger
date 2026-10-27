@@ -61,6 +61,9 @@ stockMovementRouter.get(
 // Low stock list: Staff & Owner
 stockRouter.get('/low-stock', stockMovementController.getLowStock);
 
+// Analytics & Trends: Staff & Owner
+stockRouter.get('/analytics', stockMovementController.getAnalytics);
+
 // CSV stock report: Owner only
 stockRouter.get(
   '/report.csv',

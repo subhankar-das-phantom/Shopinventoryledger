@@ -74,3 +74,50 @@ export interface Pagination {
   total: number;
   totalPages?: number;
 }
+
+export interface VelocityPoint {
+  date: string;
+  label: string;
+  inflow: number;
+  outflow: number;
+  net: number;
+}
+
+export interface CategoryDistribution {
+  name: string;
+  skuCount: number;
+  stockUnits: number;
+  totalValue: number;
+  percentage: number;
+}
+
+export interface TopProductItem {
+  productId: string;
+  name: string;
+  sku: string;
+  category: string;
+  unit: string;
+  price: number;
+  unitsSold: number;
+  transactionCount: number;
+  revenue: number;
+}
+
+export interface AnalyticsSummary {
+  totalValuation: number;
+  totalUnits: number;
+  activeSkus: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  optimalCount: number;
+  inflow30d: number;
+  outflow30d: number;
+  net30d: number;
+}
+
+export interface AnalyticsData {
+  summary: AnalyticsSummary;
+  velocity: VelocityPoint[];
+  categoryDistribution: CategoryDistribution[];
+  topProducts: TopProductItem[];
+}

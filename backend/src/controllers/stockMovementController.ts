@@ -598,5 +598,200 @@ export const stockMovementController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  /**
+   * Executive Analytics: Stock Velocity, Category Distribution, Valuation, Turnover
+   */
+  async getAnalytics(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const days = Number(req.query.days) || 14;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      startDate.setHours(0, 0, 0, 0);
+
+      // 1. Fetch active products with derived balances
+      const products = await Product.aggregate([
+        { $match: { isActive: true } },
+        {
+          $lookup: {
+            from: 'stockbalances',
+            localField: '_id',
+            foreignField: 'productId',
+            as: 'balance'
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            sku: 1,
+            name: 1,
+            category: 1,
+            unit: 1,
+            price: 1,
+            lowStockThreshold: 1,
+            currentStock: {
+              $ifNull: [{ $arrayElemAt: ['$balance.currentStock', 0] }, 0]
+            }
+          }
+        }
+      ]);
+
+      let totalValuation = 0;
+      let totalUnits = 0;
+      let lowStockCount = 0;
+      let outOfStockCount = 0;
+      let optimalCount = 0;
+
+      const categoryMap: Record<string, { skuCount: number; stockUnits: number; totalValue: number }> = {};
+
+      for (const p of products) {
+        const stock = p.currentStock || 0;
+        const value = stock * (p.price || 0);
+        totalValuation += value;
+        totalUnits += stock;
+
+        if (stock === 0) {
+          outOfStockCount++;
+        } else if (stock <= p.lowStockThreshold) {
+          lowStockCount++;
+        } else {
+          optimalCount++;
+        }
+
+        const cat = p.category || 'General';
+        if (!categoryMap[cat]) {
+          categoryMap[cat] = { skuCount: 0, stockUnits: 0, totalValue: 0 };
+        }
+        categoryMap[cat].skuCount++;
+        categoryMap[cat].stockUnits += stock;
+        categoryMap[cat].totalValue += value;
+      }
+
+      const categoryDistribution = Object.entries(categoryMap).map(([name, data]) => ({
+        name,
+        skuCount: data.skuCount,
+        stockUnits: data.stockUnits,
+        totalValue: Math.round(data.totalValue),
+        percentage: totalValuation > 0 ? Number(((data.totalValue / totalValuation) * 100).toFixed(1)) : 0
+      })).sort((a, b) => b.totalValue - a.totalValue);
+
+      // 2. Daily velocity aggregation over the last `days` days
+      const movementsInPeriod = await StockMovement.aggregate([
+        {
+          $match: {
+            movementDate: { $gte: startDate }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              date: { $dateToString: { format: '%Y-%m-%d', date: '$movementDate' } },
+              direction: '$direction'
+            },
+            totalQuantity: { $sum: '$quantity' }
+          }
+        }
+      ]);
+
+      const dailyMap: Record<string, { date: string; label: string; inflow: number; outflow: number; net: number }> = {};
+      const today = new Date();
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        const label = `${dd}/${mm}`;
+        dailyMap[dateStr] = { date: dateStr, label, inflow: 0, outflow: 0, net: 0 };
+      }
+
+      let inflow30d = 0;
+      let outflow30d = 0;
+
+      for (const item of movementsInPeriod) {
+        const dateStr = item._id.date;
+        const qty = item.totalQuantity || 0;
+        if (dailyMap[dateStr]) {
+          if (item._id.direction === 'IN') {
+            dailyMap[dateStr].inflow += qty;
+          } else {
+            dailyMap[dateStr].outflow += qty;
+          }
+          dailyMap[dateStr].net = dailyMap[dateStr].inflow - dailyMap[dateStr].outflow;
+        }
+        if (item._id.direction === 'IN') inflow30d += qty;
+        else outflow30d += qty;
+      }
+
+      const velocity = Object.values(dailyMap);
+
+      // 3. Top fast-moving products (Turnover by sales)
+      const topSales = await StockMovement.aggregate([
+        {
+          $match: {
+            type: 'SALE_OUT',
+            movementDate: { $gte: startDate }
+          }
+        },
+        {
+          $group: {
+            _id: '$productId',
+            unitsSold: { $sum: '$quantity' },
+            transactionCount: { $sum: 1 }
+          }
+        },
+        { $sort: { unitsSold: -1 } },
+        { $limit: 5 },
+        {
+          $lookup: {
+            from: 'products',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'product'
+          }
+        },
+        {
+          $project: {
+            productId: '$_id',
+            unitsSold: 1,
+            transactionCount: 1,
+            name: { $ifNull: [{ $arrayElemAt: ['$product.name', 0] }, 'Unknown Product'] },
+            sku: { $ifNull: [{ $arrayElemAt: ['$product.sku', 0] }, '—'] },
+            category: { $ifNull: [{ $arrayElemAt: ['$product.category', 0] }, '—'] },
+            unit: { $ifNull: [{ $arrayElemAt: ['$product.unit', 0] }, 'units'] },
+            price: { $ifNull: [{ $arrayElemAt: ['$product.price', 0] }, 0] }
+          }
+        }
+      ]);
+
+      const topProducts = topSales.map((s) => ({
+        ...s,
+        revenue: Math.round(s.unitsSold * s.price)
+      }));
+
+      res.status(200).json({
+        success: true,
+        data: {
+          summary: {
+            totalValuation: Math.round(totalValuation),
+            totalUnits,
+            activeSkus: products.length,
+            lowStockCount,
+            outOfStockCount,
+            optimalCount,
+            inflow30d,
+            outflow30d,
+            net30d: inflow30d - outflow30d
+          },
+          velocity,
+          categoryDistribution,
+          topProducts
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 };

@@ -59,39 +59,29 @@
   }
 }
 
-/* Glassmorphism card utilities */
-.glass-panel {
-  background: rgba(18, 19, 22, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+/* Solid Enterprise Card & Panel utilities (Taste-Skill: flat opaque surfaces, 1px hairlines, no glows) */
+.app-card {
+  background-color: var(--color-slate-900);
+  border: 1px solid var(--color-slate-800);
+  border-radius: 0.75rem;
 }
 
+.app-card-nested {
+  background-color: var(--color-slate-850);
+  border: 1px solid var(--color-slate-800);
+  border-radius: 0.5rem;
+}
+
+/* Backward-compatible alias for existing templates */
+.glass-panel,
 .glass-card {
-  background: linear-gradient(180deg, rgba(23, 24, 30, 0.8) 0%, rgba(18, 19, 22, 0.8) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+  background-color: var(--color-slate-900);
+  border: 1px solid var(--color-slate-800);
+  border-radius: 0.75rem;
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Glowing accent effects */
-.glow-blue {
-  box-shadow: 0 0 20px -3px rgba(59, 130, 246, 0.25);
-}
-
-.glow-cyan {
-  box-shadow: 0 0 20px -3px rgba(34, 211, 238, 0.25);
-}
-
-.glow-emerald {
-  box-shadow: 0 0 20px -3px rgba(52, 211, 153, 0.25);
-}
-
-.glow-rose {
-  box-shadow: 0 0 20px -3px rgba(251, 113, 133, 0.25);
+  border-color: var(--color-slate-700);
 }
 
 /* Custom premium scrollbar */
