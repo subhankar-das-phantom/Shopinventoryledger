@@ -91,7 +91,7 @@ export const StockStatusBadge: React.FC<StockStatusBadgeProps> = ({
   if (currentStock === 0) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-rose-500/10 text-rose-300 border border-rose-500/20">
-        <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+        <span className="w-1.5 h-1.5 rounded-sm bg-rose-400" />
         <span>Out of Stock</span>
       </span>
     );
@@ -100,7 +100,7 @@ export const StockStatusBadge: React.FC<StockStatusBadgeProps> = ({
   if (currentStock <= threshold) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">
-        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+        <span className="w-1.5 h-1.5 rounded-sm bg-amber-400" />
         <span>Low ({currentStock} {unit})</span>
       </span>
     );
@@ -108,7 +108,7 @@ export const StockStatusBadge: React.FC<StockStatusBadgeProps> = ({
 
   return (
     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-slate-800/80 text-slate-300 border border-slate-700/60">
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+      <span className="w-1.5 h-1.5 rounded-sm bg-emerald-400" />
       <span className="font-mono">{currentStock} {unit}</span>
     </span>
   );

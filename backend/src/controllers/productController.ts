@@ -78,7 +78,8 @@ export const productController = {
       }
 
       if (category && category !== 'all') {
-        matchStage.category = category;
+        const safeCat = String(category).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+        matchStage.category = { $regex: new RegExp(`^${safeCat}$`, 'i') };
       }
 
       if (search) {

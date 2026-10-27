@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { api, extractErrorMessage } from '../api/client.js';
 import { Product } from '../types/index.js';
-import { X, AlertCircle, Loader2 } from 'lucide-react';
+import {
+  X,
+  AlertCircle,
+  Loader2,
+  Package,
+  Barcode,
+  Tag,
+  Ruler,
+  IndianRupee,
+  AlertTriangle
+} from 'lucide-react';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -48,32 +58,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         setLowStockThreshold('5');
       }
 
-      // Fetch distinct categories from catalog to populate smart suggestions
+      // Fetch existing distinct categories to provide smart optional suggestions without restricting the user
       api.get('/products?limit=1')
         .then((res) => {
           const fetched = res.data.categories || [];
-          const defaults = [
-            'Grains & Cereals',
-            'Cooking Oils & Ghee',
-            'Pulses & Lentils',
-            'Spices & Masalas',
-            'Dairy & Refrigerated',
-            'Beverages & Tea',
-            'Packaged Snacks',
-            'Household Essentials'
-          ];
-          const combined = Array.from(new Set([...fetched, ...defaults]));
-          setAvailableCategories(combined);
+          setAvailableCategories(fetched);
         })
         .catch(() => {
-          setAvailableCategories([
-            'Grains & Cereals',
-            'Cooking Oils & Ghee',
-            'Pulses & Lentils',
-            'Spices & Masalas',
-            'Dairy & Refrigerated',
-            'Beverages & Tea'
-          ]);
+          setAvailableCategories([]);
         });
     }
   }, [isOpen, productToEdit]);
@@ -92,6 +84,11 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
     if (isNaN(numThreshold) || numThreshold < 0) {
       setError('Low stock threshold must be a non-negative number.');
+      return;
+    }
+
+    if (!category.trim()) {
+      setError('Category is required. You can enter any custom category.');
       return;
     }
 
@@ -129,212 +126,214 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full shadow-2xl overflow-hidden my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
-          <div>
-            <h2 className="text-lg font-semibold text-white">
-              {isEditing ? 'Edit Product Metadata' : 'Add New Product'}
-            </h2>
-            <p className="text-xs text-slate-400">
-              {isEditing
-                ? 'Update catalog specifications'
-                : 'Create catalog record (stock is initialized to 0)'}
-            </p>
+        <div className="flex items-center justify-between px-6 sm:px-8 py-5 border-b border-slate-800 bg-slate-900/60">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+              <Package className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-white tracking-tight">
+                {isEditing ? 'Edit Product Details' : 'Add New Product'}
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {isEditing
+                  ? 'Update product catalog specifications and thresholds'
+                  : 'Register a new product in the catalog. Initial stock is set to 0 until movements are recorded.'}
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg transition"
+            className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition"
             disabled={submitting}
+            title="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && (
-            <div className="p-3 bg-rose-950/60 border border-rose-800/80 rounded-lg flex items-start gap-2.5 text-rose-200 text-sm">
-              <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* SKU */}
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Unique SKU <span className="text-rose-400">*</span>
-            </label>
-            <input
-              type="text"
-              value={sku}
-              onChange={(e) => setSku(e.target.value.toUpperCase())}
-              disabled={isEditing}
-              required
-              placeholder="e.g. MILK-1L, BREAD-WHT"
-              maxLength={50}
-              className={`w-full border rounded-lg px-3 py-2 text-sm font-mono uppercase focus:outline-none ${
-                isEditing
-                  ? 'bg-slate-800/50 border-slate-800 text-slate-500 cursor-not-allowed'
-                  : 'bg-slate-800 border-slate-700 text-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30'
-              }`}
-            />
-            {isEditing && (
-              <p className="text-[11px] text-slate-500 mt-1">SKU is immutable once created.</p>
+        <form onSubmit={handleSubmit}>
+          <div className="p-6 sm:p-8 space-y-6">
+            {error && (
+              <div className="p-3.5 bg-rose-950/60 border border-rose-800/80 rounded-lg flex items-start gap-3 text-rose-200 text-sm">
+                <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                <span className="leading-snug">{error}</span>
+              </div>
             )}
-          </div>
 
-          {/* Name */}
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Product Name <span className="text-rose-400">*</span>
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="e.g. Whole Wheat Bread 400g"
-              maxLength={150}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
-            />
-          </div>
-
-          {/* Category & Unit */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-slate-300">
-                  Category <span className="text-rose-400">*</span>
+            {/* Section 1: Product Identification */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* SKU */}
+              <div>
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-1.5">
+                  <Barcode className="w-4 h-4 text-slate-400" />
+                  <span>Unique SKU</span>
+                  <span className="text-rose-400">*</span>
                 </label>
-                <span className="text-[10px] text-slate-500">Pick or type custom</span>
+                <input
+                  type="text"
+                  value={sku}
+                  onChange={(e) => setSku(e.target.value.toUpperCase())}
+                  disabled={isEditing}
+                  required
+                  placeholder="e.g. MILK-1L, RICE-5KG"
+                  maxLength={50}
+                  className={`w-full border rounded-lg px-3.5 py-2.5 text-sm font-mono uppercase focus:outline-none transition ${
+                    isEditing
+                      ? 'bg-slate-800/40 border-slate-800 text-slate-500 cursor-not-allowed'
+                      : 'bg-slate-800/80 border-slate-700 text-slate-100 placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30'
+                  }`}
+                />
+                <p className="text-[11px] text-slate-500 mt-1.5">
+                  {isEditing ? 'SKU is an immutable ledger identifier.' : 'Stock Keeping Unit code for barcodes and inventory.'}
+                </p>
               </div>
-              <input
-                type="text"
-                list="category-suggestions"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-                placeholder="e.g. Dairy, Spices, Grains"
-                maxLength={80}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
-              />
-              <datalist id="category-suggestions">
-                {availableCategories.map((c) => (
-                  <option key={c} value={c} />
-                ))}
-              </datalist>
 
-              {/* Quick Category Chips */}
-              <div className="flex flex-wrap gap-1 mt-1.5 max-h-16 overflow-y-auto">
-                {availableCategories.slice(0, 6).map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setCategory(c)}
-                    className={`px-1.5 py-0.5 rounded text-[10px] transition-colors border ${
-                      category.toLowerCase() === c.toLowerCase()
-                        ? 'bg-blue-500/20 text-blue-300 border-blue-500/40 font-semibold'
-                        : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-slate-300">
-                  Unit of Measure <span className="text-rose-400">*</span>
+              {/* Product Name */}
+              <div>
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-1.5">
+                  <Package className="w-4 h-4 text-slate-400" />
+                  <span>Product Name</span>
+                  <span className="text-rose-400">*</span>
                 </label>
-                <span className="text-[10px] text-slate-500">Pick or type custom</span>
-              </div>
-              <input
-                type="text"
-                list="unit-suggestions"
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-                required
-                placeholder="e.g. kg, L, pcs, pack"
-                maxLength={20}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
-              />
-              <datalist id="unit-suggestions">
-                {['kg', 'g', 'L', 'mL', 'pcs', 'pack', 'box', 'bottle'].map((u) => (
-                  <option key={u} value={u} />
-                ))}
-              </datalist>
-
-              {/* Quick Unit Chips */}
-              <div className="flex flex-wrap gap-1 mt-1.5">
-                {['kg', 'L', 'pcs', 'pack', 'g', 'box'].map((u) => (
-                  <button
-                    key={u}
-                    type="button"
-                    onClick={() => setUnit(u)}
-                    className={`px-1.5 py-0.5 rounded text-[10px] transition-colors border ${
-                      unit.toLowerCase() === u.toLowerCase()
-                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-semibold'
-                        : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
-                    }`}
-                  >
-                    {u}
-                  </button>
-                ))}
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  placeholder="e.g. Whole Wheat Bread 400g"
+                  maxLength={150}
+                  className="w-full bg-slate-800/80 border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition"
+                />
+                <p className="text-[11px] text-slate-500 mt-1.5">
+                  Descriptive display name shown across catalog and bills.
+                </p>
               </div>
             </div>
-          </div>
 
-          {/* Price & Threshold */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                Unit Price (₹ / $) <span className="text-rose-400">*</span>
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 font-mono"
-              />
+            {/* Section 2: Category & Unit */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Category (Freeform input with datalist auto-suggestions) */}
+              <div>
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-1.5">
+                  <Tag className="w-4 h-4 text-slate-400" />
+                  <span>Category</span>
+                  <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  list="category-suggestions"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  required
+                  placeholder="Type ANY category (e.g. Dairy, Spices, Snacks)"
+                  maxLength={80}
+                  className="w-full bg-slate-800/80 border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition"
+                />
+                <datalist id="category-suggestions">
+                  {availableCategories.map((c) => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
+                <p className="text-[11px] text-slate-500 mt-1.5">
+                  Freeform: Enter any category name or pick an existing one.
+                </p>
+              </div>
+
+              {/* Unit of Measure */}
+              <div>
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-1.5">
+                  <Ruler className="w-4 h-4 text-slate-400" />
+                  <span>Unit of Measure</span>
+                  <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  list="unit-suggestions"
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                  required
+                  placeholder="e.g. pcs, kg, L, pack"
+                  maxLength={20}
+                  className="w-full bg-slate-800/80 border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition"
+                />
+                <datalist id="unit-suggestions">
+                  {['pcs', 'kg', 'g', 'L', 'mL', 'pack', 'box', 'bottle', 'can', 'strip', 'meter'].map((u) => (
+                    <option key={u} value={u} />
+                  ))}
+                </datalist>
+                <p className="text-[11px] text-slate-500 mt-1.5">
+                  Unit for counting stock quantities and calculating sales.
+                </p>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                Low Stock Threshold <span className="text-rose-400">*</span>
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="1"
-                value={lowStockThreshold}
-                onChange={(e) => setLowStockThreshold(e.target.value)}
-                required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 font-mono"
-              />
+            {/* Section 3: Pricing & Stock Controls */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Price */}
+              <div>
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-1.5">
+                  <IndianRupee className="w-4 h-4 text-slate-400" />
+                  <span>Selling Price (₹)</span>
+                  <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  required
+                  placeholder="0.00"
+                  className="w-full bg-slate-800/80 border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 font-mono transition"
+                />
+                <p className="text-[11px] text-slate-500 mt-1.5">
+                  Default unit selling price for customer billing.
+                </p>
+              </div>
+
+              {/* Threshold */}
+              <div>
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-1.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <span>Low Stock Alert Threshold</span>
+                  <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={lowStockThreshold}
+                  onChange={(e) => setLowStockThreshold(e.target.value)}
+                  required
+                  placeholder="5"
+                  className="w-full bg-slate-800/80 border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 font-mono transition"
+                />
+                <p className="text-[11px] text-slate-500 mt-1.5">
+                  Alerts trigger when available stock drops to or below this level.
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-3">
+          <div className="px-6 sm:px-8 py-4 border-t border-slate-800 bg-slate-900/60 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-4 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800 transition"
+              className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700/60 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow-md shadow-blue-500/20"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition shadow-sm"
             >
               {submitting ? (
                 <>

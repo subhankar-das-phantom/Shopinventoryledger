@@ -60,14 +60,14 @@ const CustomVelocityTooltip = ({ active, payload, label }: any) => {
         <div className="space-y-1">
           <div className="flex items-center justify-between text-slate-400">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-cyan-400" />
+              <span className="w-2 h-2 rounded-sm bg-cyan-400" />
               Inflow (Purchases/Returns):
             </span>
             <span className="font-mono font-bold text-slate-200">+{inflow}</span>
           </div>
           <div className="flex items-center justify-between text-slate-400">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-rose-400" />
+              <span className="w-2 h-2 rounded-sm bg-rose-400" />
               Outflow (Sales/Loss):
             </span>
             <span className="font-mono font-bold text-slate-200">-{outflow}</span>
@@ -86,7 +86,7 @@ const CustomDonutTooltip = ({ active, payload }: any) => {
     return (
       <div className="bg-[#121316] border border-slate-700/80 p-3 rounded-lg shadow-xl text-xs space-y-1.5 min-w-[160px]">
         <div className="font-semibold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-1">
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: data.color }} />
+          <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: data.color }} />
           <span>{data.name}</span>
         </div>
         <div className="flex items-center justify-between text-slate-400">
@@ -370,11 +370,11 @@ export const DashboardPage: React.FC<DashboardProps> = ({
             <div className="flex items-center gap-3 self-end sm:self-auto">
               <div className="hidden sm:flex items-center gap-3 text-xs">
                 <span className="flex items-center gap-1.5 text-slate-400">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                  <span className="w-2 h-2 rounded-sm bg-cyan-400" />
                   Inflow (IN)
                 </span>
                 <span className="flex items-center gap-1.5 text-slate-400">
-                  <span className="w-2 h-2 rounded-full bg-rose-400" />
+                  <span className="w-2 h-2 rounded-sm bg-rose-400" />
                   Outflow (OUT)
                 </span>
               </div>
@@ -405,17 +405,6 @@ export const DashboardPage: React.FC<DashboardProps> = ({
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={velocity} margin={{ top: 8, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="inflowGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0} />
-                  </linearGradient>
-                  <linearGradient id="outflowGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#fb7185" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#fb7185" stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-
                 <CartesianGrid strokeDasharray="2 2" stroke="#20222a" vertical={false} />
 
                 <XAxis
@@ -441,8 +430,8 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                   name="Inflow (IN)"
                   stroke="#06b6d4"
                   strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#inflowGrad)"
+                  fill="#06b6d4"
+                  fillOpacity={0.12}
                 />
                 <Area
                   type="monotone"
@@ -450,8 +439,8 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                   name="Outflow (OUT)"
                   stroke="#fb7185"
                   strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#outflowGrad)"
+                  fill="#fb7185"
+                  fillOpacity={0.12}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -503,7 +492,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
             {donutData.map((cat) => (
               <div key={cat.name} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                  <span className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: cat.color }} />
                   <span className="text-slate-300 truncate">{cat.name}</span>
                 </div>
                 <div className="flex items-center gap-2 font-mono text-[11px] shrink-0">

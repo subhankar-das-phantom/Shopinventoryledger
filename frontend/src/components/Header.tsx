@@ -122,7 +122,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* User Card */}
         <div className="flex items-center gap-2.5 pl-1">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-900/80 to-slate-800 border border-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-300 shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-200 shrink-0">
             {userInitial}
           </div>
           <div className="text-right hidden sm:block">

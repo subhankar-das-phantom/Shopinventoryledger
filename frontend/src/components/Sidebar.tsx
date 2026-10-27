@@ -95,8 +95,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={onCloseMobile}
             className="flex items-center gap-3 cursor-pointer group select-none min-w-0"
           >
-            {/* Logo Icon with subtle gradient glow */}
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-blue-500/25 shrink-0 group-hover:scale-105 transition-transform">
+            {/* Logo Icon - solid corporate electric blue */}
+            <div className="w-10 h-10 rounded-lg bg-blue-600 border border-blue-500/30 flex items-center justify-center text-white font-bold text-base shadow-sm shrink-0 group-hover:bg-blue-500 transition-colors">
               IL
             </div>
 
@@ -205,14 +205,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </div>
 
                     {!isCollapsed && item.badge && (
-                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                         {item.badge}
                       </span>
                     )}
 
                     {/* Collapsed Badge Dot Indicator */}
                     {isCollapsed && item.badge && (
-                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-[#0e0f12]" />
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-sm bg-amber-400 ring-2 ring-[#0e0f12]" />
                     )}
                   </Link>
                 );
@@ -225,7 +225,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-3 border-t border-white/[0.06] bg-[#0b0c0e]">
           {isCollapsed ? (
             <div className="flex flex-col items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-900/60 to-slate-800 border border-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-300">
+              <div className="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-200">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
               <button

@@ -47,7 +47,7 @@ export const LoginPage: React.FC = () => {
       <div className="max-w-md w-full space-y-6">
         {/* Logo and Brand */}
         <div className="text-center space-y-2">
-          <div className="inline-flex w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 via-blue-500 to-cyan-500 items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-500/25">
+          <div className="inline-flex w-12 h-12 rounded-lg bg-blue-600 border border-blue-500/30 items-center justify-center text-white font-bold text-xl shadow-sm">
             IL
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Shop Inventory Ledger</h1>
@@ -57,7 +57,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Login Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 sm:p-8 shadow-2xl space-y-6">
           {error && (
             <div className="p-3 bg-rose-950/60 border border-rose-800 rounded-lg flex items-start gap-2.5 text-rose-200 text-xs">
               <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
@@ -101,7 +101,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 disabled:opacity-50 text-white py-2.5 rounded-lg text-sm font-semibold transition shadow-md shadow-blue-500/25 active:scale-95"
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 text-white py-2.5 rounded-lg text-sm font-semibold transition shadow-sm"
             >
               {loading ? (
                 <>

@@ -127,71 +127,113 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
       )}
 
       {/* Filter & Search Bar */}
-      <div className="bg-slate-800/40 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3">
-        <form onSubmit={handleSearchSubmit} className="flex-1 relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by product name, SKU, or category..."
-            className="w-full bg-slate-800 border border-slate-700 pl-9 pr-9 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
-          />
-          {search && (
+      <div className="bg-slate-800/40 border border-slate-800 p-4 rounded-xl space-y-3">
+        <div className="flex flex-col md:flex-row gap-3">
+          <form onSubmit={handleSearchSubmit} className="flex-1 relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by product name, SKU, or category..."
+              className="w-full bg-slate-800 border border-slate-700 pl-9 pr-9 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch('');
+                  flushSearch();
+                }}
+                className="absolute right-2.5 top-2.5 p-0.5 text-slate-400 hover:text-white rounded"
+                title="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </form>
+
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Status Filter */}
+            <select
+              value={selectedStatus}
+              onChange={(e) => {
+                setSelectedStatus(e.target.value);
+                setPage(1);
+              }}
+              className="bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
+            >
+              <option value="active">Active Products</option>
+              <option value="inactive">Deactivated</option>
+              <option value="all">All Statuses</option>
+            </select>
+
+            <button
+              onClick={fetchProducts}
+              title="Refresh catalog"
+              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Dynamic Category Quick Filters (Unrestricted) */}
+        {categories.length > 0 && (
+          <div className="flex items-center gap-2 pt-1 overflow-x-auto pb-1 text-xs text-slate-400">
+            <span className="shrink-0 text-slate-500 font-medium">Categories:</span>
             <button
               type="button"
               onClick={() => {
-                setSearch('');
-                flushSearch();
+                setSelectedCategory('all');
+                setPage(1);
               }}
-              className="absolute right-2.5 top-2.5 p-0.5 text-slate-400 hover:text-white rounded"
-              title="Clear search"
+              className={`shrink-0 px-2.5 py-1 rounded-md font-medium transition ${
+                selectedCategory === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
+              }`}
             >
-              <X className="w-4 h-4" />
+              All Categories
             </button>
-          )}
-        </form>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Category Filter */}
-          <select
-            value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
-              setPage(1);
-            }}
-            className="bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
-          >
-            <option value="all">All Categories</option>
             {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
+              <button
+                key={c}
+                type="button"
+                onClick={() => {
+                  setSelectedCategory(selectedCategory === c ? 'all' : c);
+                  setPage(1);
+                }}
+                className={`shrink-0 px-2.5 py-1 rounded-md font-medium transition flex items-center gap-1.5 ${
+                  selectedCategory === c
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
+                }`}
+              >
+                <span>{c}</span>
+                {selectedCategory === c && <X className="w-3 h-3 ml-0.5" />}
+              </button>
             ))}
-          </select>
+          </div>
+        )}
 
-          {/* Status Filter */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => {
-              setSelectedStatus(e.target.value);
-              setPage(1);
-            }}
-            className="bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
-          >
-            <option value="active">Active Products</option>
-            <option value="inactive">Deactivated</option>
-            <option value="all">All Statuses</option>
-          </select>
-
-          <button
-            onClick={fetchProducts}
-            title="Refresh"
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
+        {/* Active Category Tag (if custom) */}
+        {selectedCategory !== 'all' && !categories.includes(selectedCategory) && (
+          <div className="flex items-center gap-2 pt-1 text-xs">
+            <span className="text-slate-500">Filtered by:</span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-600 text-white font-medium">
+              <span>{selectedCategory}</span>
+              <button
+                type="button"
+                onClick={() => setSelectedCategory('all')}
+                className="hover:text-blue-200"
+                title="Clear category filter"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Product List Table / Cards */}
@@ -266,9 +308,17 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
 
                     {/* Category */}
                     <td className="py-3 px-4 text-slate-300 text-xs">
-                      <span className="px-2 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700/50">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedCategory(p.category);
+                          setPage(1);
+                        }}
+                        title={`Filter by category: ${p.category}`}
+                        className="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/50 transition cursor-pointer"
+                      >
                         {p.category}
-                      </span>
+                      </button>
                     </td>
 
                     {/* Current Stock Badge */}

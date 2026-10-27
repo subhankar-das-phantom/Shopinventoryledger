@@ -127,7 +127,7 @@ export const StaffPage: React.FC = () => {
                   <tr key={member._id || member.id} className="hover:bg-slate-800/30 transition-colors">
                     <td className="py-3 px-4 font-medium text-slate-200">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 font-semibold text-xs">
+                        <div className="w-7 h-7 rounded-md bg-slate-700 flex items-center justify-center text-slate-300 font-semibold text-xs">
                           {member.name.charAt(0).toUpperCase()}
                         </div>
                         <span>{member.name}</span>

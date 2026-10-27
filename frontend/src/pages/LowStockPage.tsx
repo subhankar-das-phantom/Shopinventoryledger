@@ -54,7 +54,7 @@ export const LowStockPage: React.FC<LowStockPageProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-white tracking-tight">Low Stock Attention List</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
               {items.length} critical items
             </span>
           </div>
@@ -81,7 +81,7 @@ export const LowStockPage: React.FC<LowStockPageProps> = ({
         <div className="py-16 text-center text-slate-400 text-sm">Scanning stock levels...</div>
       ) : items.length === 0 ? (
         <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-12 text-center flex flex-col items-center">
-          <div className="w-12 h-12 rounded-full bg-emerald-950 border border-emerald-800 flex items-center justify-center text-emerald-400 mb-3">
+          <div className="w-12 h-12 rounded-xl bg-emerald-950 border border-emerald-800 flex items-center justify-center text-emerald-400 mb-3">
             <PackageCheck className="w-6 h-6" />
           </div>
           <h3 className="text-lg font-semibold text-white">All Stock Levels Optimal</h3>

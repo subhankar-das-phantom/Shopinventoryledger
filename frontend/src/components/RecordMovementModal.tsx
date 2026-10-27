@@ -439,7 +439,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
                             </div>
 
                             <div className="ml-3 shrink-0 text-right">
-                              <span className={`inline-flex items-center gap-1 font-mono text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                              <span className={`inline-flex items-center gap-1 font-mono text-xs font-semibold px-2 py-0.5 rounded-md border ${
                                 p.currentStock <= p.lowStockThreshold
                                   ? p.currentStock === 0
                                     ? 'bg-rose-500/10 border-rose-500/30 text-rose-300'
