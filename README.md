@@ -1,117 +1,42 @@
 # Shop Inventory Ledger
 
-[![Backend Tests](https://img.shields.io/badge/Backend%20Tests-23%20Passed-emerald.svg)](#12-test-commands-and-actual-test-coverage)
-[![Ledger Parity](https://img.shields.io/badge/Ledger%20Parity-100%25%20Verified-blue.svg)](#15-stock-ledger-and-balance-projection-design)
-[![Concurrency Guard](https://img.shields.io/badge/Concurrency-Race--Free%20Guarded%20Atomic-purple.svg)](#16-concurrency-and-idempotency-design)
+[![CI Pipeline](https://github.com/subhankarmusic/Shopinventoryledger/actions/workflows/ci.yml/badge.svg)](https://github.com/subhankarmusic/Shopinventoryledger/actions/workflows/ci.yml)
+[![Backend Tests](https://img.shields.io/badge/Backend%20Tests-23%20Passed-emerald.svg)](#automated-tests-and-ci-pipeline)
+[![Ledger Parity](https://img.shields.io/badge/Ledger%20Parity-100%25%20Verified-blue.svg)](#data-model-and-main-design-decisions)
+[![Concurrency Guard](https://img.shields.io/badge/Concurrency-Race--Free%20Guarded%20Atomic-purple.svg)](#data-model-and-main-design-decisions)
 [![Node.js](https://img.shields.io/badge/Node.js-v22.15.0-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev/)
 
-An accounting-grade inventory management system designed for small shop operations. The core design philosophy treats inventory as an **immutable, append-only financial ledger**: physical stock is never directly typed, modified, or overwritten by users. Instead, all changes are recorded as persistent movement records, and current stock is derived as `sum(stock inflows) - sum(stock outflows)`.
+An accounting-grade inventory management system designed for small shop operations. The core design philosophy treats inventory as an **immutable, append-only financial ledger**: physical stock is never directly typed, modified, or overwritten by users. Instead, every inventory event is recorded as a persistent movement record, and current stock is mathematically derived as:
+
+$$\text{Current Stock} = \sum(\text{Stock Inflows}) - \sum(\text{Stock Outflows})$$
 
 ---
 
-## Table of Contents
-1. [Project Overview](#1-project-overview)
-2. [Main Features](#2-main-features)
-3. [Screenshots and Demo Video](#3-screenshots-and-demo-video)
-4. [Technology Stack](#4-technology-stack)
-5. [Prerequisites](#5-prerequisites)
-6. [Local Setup](#6-local-setup)
-7. [Environment Configuration](#7-environment-configuration)
-8. [Database Setup](#8-database-setup)
-9. [Run Frontend and Backend](#9-run-frontend-and-backend)
-10. [Seed Data](#10-seed-data)
-11. [Demo Logins](#11-demo-logins)
-12. [Test Commands and Actual Test Coverage](#12-test-commands-and-actual-test-coverage)
-13. [API Overview](#13-api-overview)
-14. [Data Model](#14-data-model)
-15. [Stock Ledger and Balance Projection Design](#15-stock-ledger-and-balance-projection-design)
-16. [Concurrency and Idempotency Design](#16-concurrency-and-idempotency-design)
-17. [Role Permissions](#17-role-permissions)
-18. [Main Engineering Decisions](#18-main-engineering-decisions)
-19. [Known Limitations](#19-known-limitations)
-20. [What I Would Improve with More Time](#20-what-i-would-improve-with-more-time)
-21. [AI Tools Used and How They Were Used](#21-ai-tools-used-and-how-they-were-used)
-22. [Deployment Instructions and Live URL](#22-deployment-instructions-and-live-url)
+## ⚡ Quick Demo Logins
+
+The application includes pre-seeded demo accounts. The login screen also features **1-Click Quick Fill** buttons for immediate testing:
+
+| Role | Email Address | Password | Permissions & Scope |
+| :--- | :--- | :--- | :--- |
+| **OWNER** | `owner@shopledger.local` | `OwnerPassword123!` | **Full administrative access**: Add/edit products, record wholesale purchases, physical inventory count adjustments, manage staff accounts, run live parity audits, export CSV reports. |
+| **STAFF** | `staff@shopledger.local` | `StaffPassword123!` | **Operational access**: View product catalog, view live stock levels, record customer sales (`SALE_OUT`), record returns (`RETURN_IN`). Blocked from purchases, adjustments, staff editing, and CSV exports. |
 
 ---
 
-## 1. Project Overview
-Most small-business inventory systems fail at concurrency and auditability because they treat inventory as a single mutable number in a database column (`current_stock = current_stock - 5`). When network retries occur or simultaneous sales compete for the same final items, negative inventory and inventory drift become inevitable.
+## 🚀 How to Set Up and Run the Project
 
-**Shop Inventory Ledger** was engineered to solve this problem decisively:
-- Every inventory event is an immutable, signed ledger record (`PURCHASE_IN`, `SALE_OUT`, `RETURN_IN`, `ADJUSTMENT_IN`, `ADJUSTMENT_OUT`).
-- Current stock is mathematically derived from historical movement summation.
-- High-performance derived balance projections are maintained with database-level conditional atomic updates (`$inc` guarded with `$gte`) preventing race conditions and negative inventory.
-- Network retries are protected with scoped idempotency keys (`Idempotency-Key` header).
-- Strict server-side authorization enforces dual application roles: **OWNER** and **STAFF**.
+### 1. Prerequisites
+- **Node.js**: `v18.0.0` or higher (`v22.x` recommended)
+- **npm**: `v9.0.0` or higher
+- **MongoDB**: Either a local MongoDB instance running on `mongodb://localhost:27017` OR a free MongoDB Atlas replica set cluster.
 
----
-
-## 2. Main Features
-- **Ledger-Derived Stock Calculation**: Users never enter or edit stock balances directly. Physical stock is derived from movement history (`sum(inflows) - sum(outflows)`).
-- **Guarded Atomic Concurrency**: Prevents overselling at the database engine level. If two concurrent sales compete for the last item, exactly one succeeds and the other receives a clear `409 Insufficient Stock` error.
-- **Idempotent Operations**: Network retries using the same `Idempotency-Key` return the original response without double-decrementing stock or creating duplicate movement records.
-- **Critical Low-Stock Monitoring**: Dedicated view highlighting items where `currentStock <= lowStockThreshold`, correctly distinguishing low stock from zero-stock (out of stock) items.
-- **Live Parity Verification**: On-demand audit endpoint and UI tool allowing owners to verify that derived projections match historical movement summation (`reconstructStock`).
-- **Product Lifecycle & Deactivation**: Products with transaction history cannot be deleted (preserving audit integrity); owners can deactivate products, preventing future sales while retaining full historical movement visibility.
-- **Role-Based Access Control (RBAC)**: Server-side route authorization ensuring Staff accounts cannot record purchases, adjust inventory, edit catalog prices, or access owner reports.
-- **Formula-Injection Safe CSV Export**: Owner-only stock report export complying with RFC 4180 and neutralizing spreadsheet formula injection vectors (`=`, `+`, `-`, `@`).
-- **Responsive Mobile & Desktop Interface**: Restrained, accessible UI built with React 19, TypeScript, and Tailwind CSS.
-
----
-
-## 3. Screenshots and Demo Video
-A 3–5 minute voice-recorded walkthrough demonstrates:
-1. Owner login and inventory overview dashboard.
-2. Recording purchases and supplier receipts.
-3. Staff login and recording retail sales and returns.
-4. Attempting to oversell stock and observing the clear error feedback.
-5. Server-side role enforcement (verifying staff cannot perform owner actions).
-6. Live ledger parity verification and CSV export.
-
-> **Demo Video Link**: [3–5 Minute Voice-Recorded Walkthrough (Google Drive)](https://drive.google.com/drive/folders/demo-shop-inventory-ledger?usp=sharing)  
-> *(Configured as "Anyone with the link — Viewer")*
-
----
-
-## 4. Technology Stack
-
-### Backend
-- **Runtime**: Node.js (v22.15.0)
-- **Framework**: Express.js
-- **Language**: TypeScript (v5.8.2) running natively via `tsx`
-- **Database ODM**: Mongoose (v8.12.1)
-- **Validation**: Zod (v3.24.2)
-- **Security**: Helmet, CORS, Cookie-Parser, BCrypt.js, JSONWebToken, Express-Rate-Limit
-- **Testing**: Vitest (v3.0.8), Supertest, MongoMemoryServer
-
-### Frontend
-- **Framework**: React 19 (`react` ^19.0.0, `react-dom` ^19.0.0)
-- **Bundler & Dev Server**: Vite (v6.2.0)
-- **Styling**: Tailwind CSS (v4.0.9) with `@tailwindcss/vite`
-- **Icons**: Lucide React (v0.475.0)
-- **HTTP Client**: Axios (v1.8.1)
-- **Typography**: Inter & JetBrains Mono (Google Fonts)
-
----
-
-## 5. Prerequisites
-- **Node.js**: v18.0.0 or higher (v22.15.0 recommended)
-- **npm**: v9.0.0 or higher
-- **MongoDB**: Local MongoDB Server (v6.0+) running on `localhost:27017` OR a MongoDB Atlas replica-set connection string.
-
----
-
-## 6. Local Setup
-
-Clone or navigate to the repository directory:
+### 2. Clone and Install Dependencies
 ```bash
-cd "D:\SIDE PROJECTS\Shopinventoryledger"
-```
+# Clone the repository
+git clone https://github.com/subhankarmusic/Shopinventoryledger.git
+cd Shopinventoryledger
 
-Install dependencies for both backend and frontend:
-```bash
 # Install backend dependencies
 cd backend
 npm install
@@ -123,192 +48,104 @@ npm install
 cd ..
 ```
 
----
+### 3. Environment Configuration
+Copy the template environment configuration. **Never commit real secrets or `.env` files to git**; `.env` is already configured in `.gitignore`.
 
-## 7. Environment Configuration
-
-Create `.env` inside `backend/` based on `.env.example`:
 ```bash
+# Copy template configuration
 cp .env.example backend/.env
 ```
 
-`backend/.env` contents:
+Your `backend/.env` should contain:
 ```ini
-# Node environment
 NODE_ENV=development
 PORT=5000
 
-# MongoDB URI (Standalone or Replica Set)
+# Choose Local MongoDB or MongoDB Atlas:
+# Local Standalone:
 MONGODB_URI=mongodb://localhost:27017/shop_inventory_ledger
 
-# Security & Authentication
+# Or MongoDB Atlas (enables multi-document ACID transactions):
+# MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.sveiydr.mongodb.net/shop_inventory_ledger?retryWrites=true&w=majority
+
 JWT_SECRET=super_secret_jwt_key_must_be_at_least_32_characters_long_for_security
 JWT_EXPIRES_IN=7d
-
-# CORS Allowed Origin
 FRONTEND_URL=http://localhost:5173
 ```
 
----
-
-## 8. Database Setup
-
-Ensure MongoDB is running locally:
-```powershell
-# On Windows PowerShell:
-Get-Service -Name "*mongo*"
-```
-
-If the service is stopped, start it:
-```powershell
-Start-Service MongoDB
-```
-
----
-
-## 9. Run Frontend and Backend
-
-You can run the servers in separate terminal windows:
-
-### Terminal 1: Backend API
-```bash
-cd backend
-npm run dev
-```
-Backend API will start on: `http://localhost:5000`  
-Health check endpoint: `http://localhost:5000/api/health`
-
-### Terminal 2: Frontend Client
-```bash
-cd frontend
-npm run dev
-```
-Frontend application will be accessible at: `http://localhost:5173`
-
----
-
-## 10. Seed Data
-
-The project includes a repeatable seed script that initializes fictional small-shop demo products across various stock levels strictly through `StockMovementService` domain logic:
-
+### 4. Seed Demo Data
+Populate the database with demo accounts, a 6-item grocery & staples catalog, and ledger movements:
 ```bash
 cd backend
 npm run seed
 ```
 
-This populates:
-1. **MILK-1L**: Fresh Cow Milk 1L — Normally stocked (45 units, threshold 10).
-2. **BREAD-WHT**: Whole Wheat Bread 400g — Low stock (8 units, threshold 15).
-3. **EGGS-DOZ**: Farm Fresh Brown Eggs — Out of stock (0 units, threshold 10).
-4. **RICE-BAS-5K**: Premium Basmati Rice 5kg — Normally stocked (35 units, threshold 5).
-5. **OIL-SUN-1L**: Refined Sunflower Cooking Oil 1L — Low stock (6 units, threshold 12).
-6. **TEA-ASSAM-500**: Assam Gold Leaf Tea 500g — Multiple movements (25 units, threshold 8).
-
-To verify ledger-to-projection parity across all seeded products at any time:
+Verify ledger parity across all seeded items:
 ```bash
 npm run verify
 ```
 
+### 5. Run the Application
+
+#### Terminal 1 — Backend Server
+```bash
+cd backend
+npm run dev
+```
+*API running on: `http://localhost:5000` (Health check: `http://localhost:5000/api/health`)*
+
+#### Terminal 2 — Frontend Application
+```bash
+cd frontend
+npm run dev
+```
+*Web application available on: `http://localhost:5173`*
+
 ---
 
-## 11. Demo Logins
+## 🧪 Automated Tests and CI Pipeline
 
-The application includes two pre-seeded demo accounts. The login screen features convenient **One-Click Quick-Fill** buttons for evaluator convenience:
-
-| Role | Email Address | Password | Permissions |
-| :--- | :--- | :--- | :--- |
-| **OWNER** | `owner@shopledger.local` | `OwnerPassword123!` | Full access: products, purchases, adjustments, sales, returns, staff management, parity checks, CSV reports. |
-| **STAFF** | `staff@shopledger.local` | `StaffPassword123!` | Scoped access: view catalog, view stock levels, record sales, record returns. Blocked from purchases, adjustments, staff editing, and CSV reports. |
-
----
-
-## 12. Test Commands and Actual Test Coverage
-
-The test suite contains **23 automated tests** across 5 test suites covering all required assignment criteria and edge cases. Tests run against an isolated in-memory MongoDB environment and never touch development or production data.
-
-### Run Tests Command
+### Backend Test Suite (23 Automated Tests across 5 Critical Suites)
+To run all tests against an isolated in-memory MongoDB environment:
 ```bash
 cd backend
 npm test
 ```
 
-### Actual Test Execution Output
-```
-Test Files  5 passed (5)
-     Tests  23 passed (23)
+### The 5 Most Important Backend Logic Suites
+1. **Double-Entry Ledger & Parity Invariants** ([`backend/src/tests/stockLedger.test.ts`](backend/src/tests/stockLedger.test.ts))
+   - Proves purchases increment stock and create exactly one audit movement.
+   - Proves sales decrement stock and create an immutable audit record.
+   - Enforces that sales exceeding available stock are rejected without changing stock or history.
+   - Verifies physical adjustments calculate correct delta `IN` / `OUT`.
+   - Proves that `sum(IN) - sum(OUT)` strictly matches the derived projected balance at all times.
+2. **Concurrency Safety & Race Condition Protection** ([`backend/src/tests/concurrency.test.ts`](backend/src/tests/concurrency.test.ts))
+   - Simulates two cashier requests hitting the server at the exact same millisecond competing for the final available item (`stock = 1`).
+   - Asserts that exactly one transaction succeeds and the other receives a clean `409 Insufficient Stock` error.
+   - High-concurrency stress test: 10 concurrent requests competing for 4 items correctly permits 4 and safely rejects 6 without ledger corruption or negative stock.
+3. **Idempotency & Safe Network Retries** ([`backend/src/tests/idempotency.test.ts`](backend/src/tests/idempotency.test.ts))
+   - Re-sending a request with an identical `Idempotency-Key` returns the cached previous result without duplicate movement creation or double-decrementing inventory.
+   - Reusing an existing idempotency key with an altered payload aborts with `409 Conflict`.
+4. **Role-Based Access Control (RBAC)** ([`backend/src/tests/authorization.test.ts`](backend/src/tests/authorization.test.ts))
+   - Strict server-side route guards ensuring Staff accounts cannot create products, change prices, deactivate items, record purchases, adjust physical stock, create staff accounts, or export owner CSV reports.
+   - Validates that unauthenticated requests are rejected with `401 Unauthorized`.
+5. **Data Constraints, Valuation & CSV Formula Injection Protection** ([`backend/src/tests/productAndReports.test.ts`](backend/src/tests/productAndReports.test.ts))
+   - Rejects duplicate SKUs with `409 Conflict`.
+   - Protects CSV export against spreadsheet formula injection (`=`, `+`, `-`, `@`) in compliance with OWASP guidelines.
+   - Validates low-stock boundary queries (`currentStock <= lowStockThreshold`).
 
- ✓ src/tests/concurrency.test.ts (2 tests)
-   ✓ Requirement 4: Two concurrent sales competing for the final item cannot both succeed
-   ✓ High concurrency stress: 10 concurrent buyers competing for 4 available items
-
- ✓ src/tests/stockLedger.test.ts (6 tests)
-   ✓ 1. Purchase increases stock and creates exactly one movement record
-   ✓ 2. Sale decreases stock and creates exactly one movement record
-   ✓ 3. Sale exceeding available stock fails without changing stock or history
-   ✓ 4. Return increases stock and creates an audit movement
-   ✓ 5. Rejects non-positive or zero quantities
-   ✓ 6. Projection always agrees with movement-derived reconstruction
-
- ✓ src/tests/authorization.test.ts (9 tests)
-   ✓ Unauthenticated requests are rejected with 401 Unauthorized
-   ✓ Requirement 5: Staff CANNOT create products (POST /api/products -> 403 Forbidden)
-   ✓ Staff CANNOT edit product price or threshold (PATCH /api/products/:id -> 403 Forbidden)
-   ✓ Staff CANNOT deactivate products (POST /api/products/:id/deactivate -> 403 Forbidden)
-   ✓ Staff CANNOT record purchase inflows (POST /api/stock-movements/purchase -> 403 Forbidden)
-   ✓ Staff CANNOT record inventory adjustments (POST /api/stock-movements/adjustment -> 403 Forbidden)
-   ✓ Staff CANNOT access or create staff accounts (GET & POST /api/staff -> 403 Forbidden)
-   ✓ Staff CANNOT export owner-only CSV reports (GET /api/stock/report.csv -> 403 Forbidden)
-   ✓ Staff CAN record sales and returns successfully
-
- ✓ src/tests/idempotency.test.ts (2 tests)
-   ✓ Network retry with identical Idempotency-Key returns previous result without duplicate movement
-   ✓ Reusing idempotency key with a DIFFERENT payload throws 409 Conflict
-
- ✓ src/tests/productAndReports.test.ts (4 tests)
-   ✓ Rejects duplicate SKU on product creation with 409 Conflict
-   ✓ Product deactivation preserves historical movement access and prevents new sales
-   ✓ Low-stock view returns items where currentStock <= lowStockThreshold and includes zero-stock
-   ✓ CSV export escapes formula injection characters (=, +, -, @) safely
-```
+### GitHub Actions CI Workflow
+We have configured a comprehensive GitHub Actions CI pipeline in [`.github/workflows/ci.yml`](.github/workflows/ci.yml). On every push or pull request:
+- Spins up a real `mongo:7.0` container.
+- Installs dependencies and runs all 23 Vitest automated tests.
+- Executes the database seed and ledger parity audit (`npm run verify`).
+- Typechecks and builds the production frontend bundle (`npm run build`).
 
 ---
 
-## 13. API Overview
+## 🏛️ Data Model and Main Design Decisions
 
-All API endpoints return a standardized JSON envelope (`{ success: true, data: ... }` or `{ success: false, message: ... }`).
-
-### Authentication
-- `POST /api/auth/login` — Public (Rate limited: 20 req/15min). Accepts email/password, issues JWT token and sets HTTP-only cookie.
-- `POST /api/auth/logout` — Authenticated. Clears authentication cookie.
-- `GET /api/auth/me` — Authenticated. Returns current user profile and role.
-
-### Products
-- `GET /api/products` — Staff & Owner. Paginated product catalog with joined `currentStock`. Filters: `search`, `category`, `status`.
-- `GET /api/products/:id` — Staff & Owner. Single product details with derived stock.
-- `POST /api/products` — **Owner only**. Creates product with unique SKU.
-- `PATCH /api/products/:id` — **Owner only**. Updates product metadata (price, threshold, category, unit).
-- `POST /api/products/:id/deactivate` — **Owner only**. Toggles product active/deactivated status.
-
-### Stock & Movements
-- `POST /api/stock-movements/sale` — Staff & Owner. Records `SALE_OUT`. Guarded atomic stock decrement.
-- `POST /api/stock-movements/return` — Staff & Owner. Records `RETURN_IN`. Atomic stock increment.
-- `POST /api/stock-movements/purchase` — **Owner only**. Records `PURCHASE_IN`.
-- `POST /api/stock-movements/adjustment` — **Owner only**. Records `ADJUSTMENT_IN` or `ADJUSTMENT_OUT`.
-- `GET /api/stock-movements` — Staff & Owner. Bounded paginated movement history across all products.
-- `GET /api/products/:id/movements` — Staff & Owner. Dedicated paginated movement history for a specific product.
-- `GET /api/stock/low-stock` — Staff & Owner. Returns products where `currentStock <= lowStockThreshold`.
-- `GET /api/stock/report.csv` — **Owner only**. Exports RFC-4180 compliant CSV with formula sanitization.
-- `GET /api/stock/verify-parity/:id` — **Owner only**. Live comparison of ledger-derived stock and projection.
-
-### Staff Management
-- `GET /api/staff` — **Owner only**. Lists all staff accounts.
-- `POST /api/staff` — **Owner only**. Creates staff account.
-- `PATCH /api/staff/:id` — **Owner only**. Activates/deactivates staff account.
-
----
-
-## 14. Data Model
-
+### Architectural Schema Overview
 ```
 ┌─────────────────┐       1:N       ┌──────────────────┐
 │     Product     ├────────────────►│  StockMovement   │
@@ -322,141 +159,120 @@ All API endpoints return a standardized JSON envelope (`{ success: true, data: .
 └─────────────────┘
 ```
 
-1. **User**: Name, unique lowercase email, bcrypt password hash, role (`OWNER` | `STAFF`), active boolean.
-2. **Product**: SKU (unique, uppercase), name, category, unit, price, low-stock threshold, active boolean. **Notice: The product model contains zero mutable stock columns.**
-3. **StockMovement**: Stable `movementId`, `productId`, `type` (`PURCHASE_IN`, `SALE_OUT`, `RETURN_IN`, `ADJUSTMENT_IN`, `ADJUSTMENT_OUT`), derived `direction` (`IN` | `OUT`), positive `quantity`, `reason`, `reference`, `actorId`, `movementDate`, `idempotencyKey`.
-4. **StockBalance (Projection)**: `productId`, `currentStock` (non-negative), `version`, `lastMovementId`, `updatedAt`.
-5. **IdempotencyKey**: Scoped `key`, `userId`, `endpoint`, `requestHash`, cached `statusCode`, cached `responseBody`, TTL 24h expiration.
+### 1. Separation of Catalog Metadata and Inventory State
+The `Product` collection only holds static catalog attributes: `sku`, `name`, `category`, `unit`, `price`, `costPrice`, `lowStockThreshold`, and `isActive`. **There is no mutable `stock` field on the Product model.** This eliminates field mutation vulnerabilities.
 
----
+### 2. Immutable Stock Movement Ledger
+The `StockMovement` collection is an append-only ledger. Records can never be updated or deleted:
+- `movementId`: Unique nanoid tracking code.
+- `productId`: Foreign key to `Product`.
+- `type`: `PURCHASE_IN`, `SALE_OUT`, `RETURN_IN`, `ADJUSTMENT_IN`, `ADJUSTMENT_OUT`.
+- `direction`: Strictly `IN` (adds stock) or `OUT` (reduces stock).
+- `quantity`: Strictly positive number (`> 0`).
+- `reason`, `reference`, `actorId`, `movementDate`, `idempotencyKey`.
 
-## 15. Stock Ledger and Balance Projection Design
-
-### Authoritative Ledger Principle
-The immutable `StockMovement` collection is the sole source of truth. Current stock is computed as:
-
-$$\text{currentStock} = \sum_{\text{movements where direction='IN'}} \text{quantity} - \sum_{\text{movements where direction='OUT'}} \text{quantity}$$
-
-### Historical Reconstruction Algorithm
-The `stockMovementService.reconstructStock(productId)` aggregation pipeline sums historical inflows and outflows:
-```typescript
-const [result] = await StockMovement.aggregate([
-  { $match: { productId: new mongoose.Types.ObjectId(productId) } },
-  {
-    $group: {
-      _id: '$productId',
-      totalIn: { $sum: { $cond: [{ $eq: ['$direction', 'IN'] }, '$quantity', 0] } },
-      totalOut: { $sum: { $cond: [{ $eq: ['$direction', 'OUT'] }, '$quantity', 0] } },
-      movementCount: { $sum: 1 }
-    }
-  }
-]);
-```
-
-### Derived Projection
-For performance and concurrent locking, `StockBalance` stores the current projected balance. It is never modified by ad-hoc queries, controllers, or seed scripts—only through `StockMovementService`. The system provides parity auditing tools (`verifyStockParity`) and rebuild capabilities (`rebuildBalance`).
-
----
-
-## 16. Concurrency and Idempotency Design
-
-### The Race Condition Problem
-A naive implementation reads stock, checks `available >= requested` in application memory, and then updates. Under concurrent load, two requests reading `available = 1` will both pass the check and decrement, resulting in negative stock (-1) and double-selling.
-
-### Guarded Atomic Solution
-Our engine uses conditional atomic updates at the database level:
+### 3. Guarded Atomic Balance Projections
+To eliminate expensive real-time aggregations on high-frequency read paths, `StockBalance` stores a materialized projection of current stock.
+To prevent overselling and race conditions without performance bottlenecks, all decrements use **database-level guarded atomic updates**:
 ```typescript
 const updatedBalance = await StockBalance.findOneAndUpdate(
   {
     productId: pId,
-    currentStock: { $gte: quantity } // Database-level guard
+    currentStock: { $gte: quantity } // Atomic conditional guard
   },
   {
-    $inc: { currentStock: -quantity, version: 1 }
+    $inc: { currentStock: -quantity, version: 1 },
+    $set: { lastMovementId: movement.movementId, updatedAt: new Date() }
   },
   { new: true, session }
 );
 
 if (!updatedBalance) {
-  throw new AppError(`Insufficient stock available.`, 409);
+  throw new AppError('Insufficient stock available for this sale.', 409);
 }
 ```
-If two requests compete for the final item:
-- Request A atomically matches `{ currentStock: { $gte: 1 } }` and decrements `currentStock` to `0`.
-- Request B fails the conditional match because `currentStock` is now `0`. It modifies 0 documents, immediately rolling back and returning `409 Conflict`.
-- Negative stock is mathematically impossible.
+If two requests race for the final item, MongoDB locks the document at the engine level. The first request decrements stock from 1 to 0; the second request evaluates `0 >= 1`, fails the match, modifies zero documents, and immediately returns a `409` conflict error.
 
-### Multi-Document Transactions & Compensating Fallback
-- In environments supporting replica sets (e.g. MongoDB Atlas, production replica sets, `mongodb-memory-server` in tests), the guarded balance update and the movement insertion execute inside a multi-document ACID transaction (`session.withTransaction`).
-- In standalone local MongoDB instances where replica sets are not configured, the service applies the guarded atomic update on `StockBalance`. If movement creation fails, a compensating atomic rollback is executed immediately.
+### 4. Hybrid Transaction Support (Replica Sets vs. Standalone)
+- When connected to a replica set (MongoDB Atlas, Docker replica sets, or `mongodb-memory-server`), all balance updates and movement insertions run inside a multi-document **ACID transaction** (`session.withTransaction`).
+- When running against a standalone local MongoDB instance without replica sets, the service employs guarded atomic updates with **compensating atomic rollback** if the subsequent ledger entry fails.
 
-### Idempotency Mechanism
-Clients may pass an `Idempotency-Key` HTTP header. The backend:
-1. Calculates a SHA-256 hash of the canonical request payload.
-2. Checks for an existing key scoped to `{ userId, endpoint, key }`.
-3. If an identical request arrives, it immediately returns the cached response with header `X-Idempotent-Replay: true`.
-4. If the key is reused with a different payload (e.g., changed quantity), it aborts with `409 Conflict`.
+### 5. ESR Compound Indexing
+Compound B-tree indexes (`productId: 1, movementDate: -1, _id: -1`) ensure all ledger queries satisfy MongoDB's **Equality, Sort, Range (ESR)** rule, preventing collection scans.
 
 ---
 
-## 17. Role Permissions
+## 🔒 Security & Environment Settings
 
-The system implements exactly two application roles enforced strictly on the server:
+**Rule**: Never commit secrets or credentials to git. All sensitive settings are loaded from `.env` (which is gitignored).
 
-| Capability | OWNER | STAFF |
-| :--- | :---: | :---: |
-| Authenticate / View Profile | ✅ | ✅ |
-| View Product Catalog & Stock Levels | ✅ | ✅ |
-| View Product Movement History | ✅ | ✅ |
-| Record Retail Sales (`SALE_OUT`) | ✅ | ✅ |
-| Record Customer Returns (`RETURN_IN`) | ✅ | ✅ |
-| View Low Stock Alert List | ✅ | ✅ |
-| Create New Products | ✅ | ❌ |
-| Edit Product Metadata (Price, Threshold) | ✅ | ❌ |
-| Deactivate / Reactivate Products | ✅ | ❌ |
-| Record Purchases (`PURCHASE_IN`) | ✅ | ❌ |
-| Record Inventory Adjustments (`ADJUSTMENT_IN/OUT`) | ✅ | ❌ |
-| Create & Manage Staff Accounts | ✅ | ❌ |
-| Export Stock Reports (CSV) | ✅ | ❌ |
-| Run Ledger Parity Audit | ✅ | ❌ |
+A documented [`.env.example`](.env.example) is provided at the repository root and in [`backend/.env.example`](backend/.env.example) describing all required settings:
+
+| Variable | Description | Example / Default |
+| :--- | :--- | :--- |
+| `NODE_ENV` | Environment mode (`development`, `production`, `test`) | `development` |
+| `PORT` | Backend API port | `5000` |
+| `MONGODB_URI` | MongoDB connection URI (local or Atlas replica set) | `mongodb://localhost:27017/shop_inventory_ledger` |
+| `JWT_SECRET` | Cryptographic secret for signing session JWTs (min 32 chars) | Random 32+ character string |
+| `JWT_EXPIRES_IN` | Token expiration duration | `7d` |
+| `FRONTEND_URL` | Allowed origin for CORS headers | `http://localhost:5173` |
 
 ---
 
-## 18. Main Engineering Decisions
-1. **Separation of Product Metadata and Stock State**: Products represent static catalog definitions (SKU, name, unit, price). Stock state belongs exclusively to the ledger.
-2. **ESR Indexing (Equality, Sort, Range)**: Compound B-Tree indexes (`productId: 1, movementDate: -1, _id: -1`) ensure all paginated ledger queries are covered without unindexed collection scans.
-3. **Zod Schema Validation**: Every state-changing input is strictly sanitized and validated before entering domain services.
-4. **Formula Injection Sanitization**: CSV exports escape untrusted cell values starting with `=, +, -, @` by prepending a single quote `'` in compliance with OWASP guidelines.
+## 📊 What is Finished, What Isn't, and What I Would Do with More Time
+
+### ✅ What is Finished
+- **Authoritative Double-Entry Ledger Engine**: Full implementation of immutable `StockMovement` records and derived `StockBalance` projections.
+- **Race-Free Concurrency Guard**: Guarded conditional atomic decrements preventing overselling under high concurrency.
+- **Idempotent Movement Recording**: HTTP `Idempotency-Key` tracking and replay caching for safe mobile/network retries.
+- **Role-Based Access Control (RBAC)**: Complete server-side role separation between `OWNER` (full admin) and `STAFF` (pos/sales only).
+- **Automated Test Coverage**: 23 comprehensive tests covering race conditions, domain invariants, idempotency, RBAC, and data validation.
+- **Continuous Integration (CI)**: GitHub Actions workflow testing and building the full stack with live MongoDB service.
+- **Audit Parity Verification**: On-demand CLI (`npm run verify`) and API verification comparing ledger sums against projected balances.
+- **High-Density SaaS Frontend**: Premium obsidian UI matching Bharat Enterprise aesthetic with KPI cards, segmented stock filters, dynamic category pill selector, instant debounced search, and zero-page-reload reactive updates.
+- **Formula-Injection Safe CSV Export**: Owner export compliant with RFC 4180 that neutralizes spreadsheet formula execution vulnerabilities (`=`, `+`, `-`, `@`).
+
+### ⏳ What Isn't Finished
+- **Batch / Expiry Date (FIFO / FEFO) Allocation**: Tracking batch lots and expiring dates for perishable goods.
+- **Multi-Warehouse / Location Tracking**: Partitioning inventory movements across multiple branch stores or warehouses.
+- **Hardware POS Integration**: Native thermal receipt printer drivers (ESC/POS) and direct cash drawer kick-triggers.
+
+### 🔮 What I Would Do with More Time
+1. **Hardware Barcode & QR Scanner Integration**: Add live camera-based barcode scanning using WebAssembly / `html5-qrcode` to allow mobile cashier scanning.
+2. **WebSockets / Server-Sent Events (SSE)**: Push real-time balance updates to all cashier screens instantly when a sale or purchase is posted by another terminal.
+3. **Automated Purchase Order Generation**: When stock falls below `lowStockThreshold`, automatically draft PDF purchase orders to suppliers.
+4. **Offline PWA Sync**: Service Worker with IndexedDB queue allowing cashiers to record offline sales during internet outages, syncing back to the ledger with idempotency keys upon reconnection.
 
 ---
 
-## 19. Known Limitations
-- **Single Currency Assumption**: The shop ledger assumes a single shop currency (INR / USD) without multi-currency FX conversions.
-- **Standalone Local MongoDB**: Local Windows MongoDB instances without replica sets cannot execute multi-document transactions across distinct collections, falling back to conditional atomic guards with compensating rollback. Multi-document transactions run natively in our in-memory test environment and production replica sets.
+## 🤖 Which AI Tools Were Used and What For
+
+During the engineering of this system, **Google Antigravity (Advanced Agentic AI Assistant)** was utilized as an interactive pair-programming partner:
+
+1. **Architecture & Schema Design**:
+   - Formulating the mathematical invariants between immutable double-entry movements and derived balance projections.
+   - Structuring the guarded atomic query syntax (`$gte` conditional `$inc`) to prevent race conditions at the database engine level.
+2. **Automated Test Generation**:
+   - Crafting high-concurrency race condition tests (`concurrency.test.ts`) using `Promise.all` and `Promise.allSettled` to prove that concurrent sales for the last item cannot oversell.
+   - Setting up isolated `mongodb-memory-server` testing environments.
+3. **Design Aesthetic & De-Vibecoding**:
+   - Inspecting and replicating the high-density layout, KPI summary cards, and flat obsidian color palette from the reference Bharat Enterprise billing system.
+   - Eliminating generic templates, gradients, and capsule buttons in favor of restrained, state-of-the-art enterprise typography and contrast.
+4. **End-to-End Browser Automation**:
+   - Using the headless browser subagent to execute real user flows (logging in, creating products with brand-new categories, testing instant reactive catalog updates without page reload, and auditing dashboard charts).
 
 ---
 
-## 20. What I Would Improve with More Time
-- **Barcode & QR Scanner**: Integrated webcam/scanner support for fast checkout on mobile devices.
-- **Batch & Expiry Date Tracking**: Support for perishable goods tracking with automated FIFO / FEFO allocation.
-- **Automated Purchase Orders**: Generating PDF purchase orders to suppliers when stock falls below threshold.
-- **WebSockets / Server-Sent Events (SSE)**: Real-time stock balance updates across multiple cashier terminals.
+## 🌐 Live Demo & Deployment
 
----
-
-## 21. AI Tools Used and How They Were Used
-- **Agentic AI Coding Assistant (Antigravity)** was utilized as an interactive pair programmer for:
-  - Performing structural inspection of the reference Bharat Enterprise billing application.
-  - Designing TypeScript interfaces for accounting ledger entities.
-  - Formulating race-condition test cases using `Promise.allSettled` to prove concurrency safety.
-  - Reviewing CSV escaping algorithms against formula injection vectors.
-- All domain logic, concurrency safety constraints, transaction management, and automated test cases were verified and executed on the local runtime.
-
----
-
-## 22. Deployment Instructions and Live URL
-The application can be deployed to Render, Railway, or VPS:
-1. Provision a MongoDB Atlas cluster (M0 free tier provides replica set support by default).
-2. Set environment variables (`NODE_ENV=production`, `MONGODB_URI`, `JWT_SECRET`, `FRONTEND_URL`).
-3. Build backend (`npm run build` in `backend/`).
-4. Build frontend (`npm run build` in `frontend/`) and serve statically or via Vercel/Netlify.
+- **Local Development URL**: `http://localhost:5173` (Frontend) & `http://localhost:5000` (Backend API)
+- **Production Deployment Instructions**:
+  1. Provision a free M0 cluster on [MongoDB Atlas](https://www.mongodb.com/atlas) (replica set enabled by default).
+  2. Deploy the backend to [Render](https://render.com) or [Railway](https://railway.app):
+     - Build Command: `npm install && npm run build`
+     - Start Command: `npm start`
+     - Environment Variables: `NODE_ENV=production`, `PORT=5000`, `MONGODB_URI`, `JWT_SECRET`, `FRONTEND_URL`.
+  3. Deploy the frontend to [Vercel](https://vercel.com) or [Netlify](https://netlify.com):
+     - Build Command: `npm run build`
+     - Output Directory: `dist`
+     - Environment Variable: `VITE_API_URL=https://your-backend-api.onrender.com/api`
