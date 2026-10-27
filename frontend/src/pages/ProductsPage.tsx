@@ -215,7 +215,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-amber-300 font-mono tracking-tight">
+            <div className="text-2xl font-bold text-amber-400 font-mono tracking-tight">
               {stats.lowStockCount}
             </div>
             <p className="text-[11px] text-slate-500 mt-0.5">At or below reorder threshold</p>
@@ -236,7 +236,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-rose-300 font-mono tracking-tight">
+            <div className="text-2xl font-bold text-rose-400 font-mono tracking-tight">
               {stats.outOfStockCount}
             </div>
             <p className="text-[11px] text-slate-500 mt-0.5">Zero physical units available</p>
@@ -252,7 +252,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-emerald-300 font-mono tracking-tight">
+            <div className="text-2xl font-bold text-emerald-400 font-mono tracking-tight">
               ₹{stats.totalValuation.toLocaleString('en-IN')}
             </div>
             <p className="text-[11px] text-slate-500 mt-0.5">Current asset valuation (excl. tax)</p>
@@ -332,7 +332,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                   setSearch('');
                   flushSearch();
                 }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-white rounded"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-100 rounded"
                 title="Clear search"
               >
                 <X className="w-4 h-4" />
@@ -356,7 +356,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                 className={`flex-1 py-1 px-2 rounded-md font-medium transition text-center truncate ${
                   stockFilter === tab.id
                     ? 'bg-blue-600 text-white shadow-xs font-semibold'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-850'
                 }`}
               >
                 <span>{tab.label}</span>
@@ -458,7 +458,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider">
+                <tr className="border-b border-slate-800 bg-slate-850 text-slate-400 text-xs font-semibold uppercase tracking-wider">
                   <th className="py-3 px-4 font-semibold">Product Name & SKU</th>
                   <th className="py-3 px-4 font-semibold">Category</th>
                   <th className="py-3 px-4 font-semibold">Physical Stock</th>
@@ -581,7 +581,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                             <button
                               onClick={() => onOpenProductModal(p)}
                               title="Edit Product Details"
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>

@@ -114,7 +114,7 @@ export const StaffPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider">
+                <tr className="border-b border-slate-800 bg-slate-850 text-slate-400 text-xs font-semibold uppercase tracking-wider">
                   <th className="py-3.5 px-4 font-semibold">User</th>
                   <th className="py-3.5 px-4 font-semibold">Email</th>
                   <th className="py-3.5 px-4 font-semibold">Role</th>
@@ -246,7 +246,7 @@ export const StaffPage: React.FC = () => {
                   type="button"
                   onClick={() => setShowCreateModal(false)}
                   disabled={submitting}
-                  className="px-4 py-2 text-sm text-slate-400 hover:text-white"
+                  className="px-4 py-2 text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-lg transition"
                 >
                   Cancel
                 </button>

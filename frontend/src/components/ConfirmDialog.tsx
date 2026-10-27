@@ -38,10 +38,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div className="flex-1">
-            <h3 className="text-base font-semibold text-white">{title}</h3>
+            <h3 className="text-base font-semibold text-slate-100">{title}</h3>
             <p className="text-sm text-slate-300 mt-1">{message}</p>
           </div>
-          <button onClick={onCancel} className="text-slate-500 hover:text-white p-1">
+          <button onClick={onCancel} className="text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded p-1 transition-colors" title="Close">
             <X className="w-4 h-4" />
           </button>
         </div>

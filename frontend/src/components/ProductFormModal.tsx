@@ -154,7 +154,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition"
+            className="text-slate-400 hover:text-slate-100 p-2 rounded-lg hover:bg-slate-800 transition"
             disabled={submitting}
             title="Close modal"
           >
@@ -333,7 +333,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none border border-slate-700/60 transition"
+              className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-slate-100 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none border border-slate-700/60 transition"
             >
               Cancel
             </button>

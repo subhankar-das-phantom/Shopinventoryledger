@@ -34,18 +34,24 @@
   --color-slate-50:  #ffffff;
 
   /* Accent: Electric Blue & Cyan */
+  --color-blue-300: #93c5fd;
   --color-blue-400: #60a5fa;
   --color-blue-500: #3b82f6;
   --color-blue-600: #2563eb;
   --color-blue-700: #1d4ed8;
 
   /* Semantic Accents */
+  --color-cyan-300: #67e8f9;
   --color-cyan-400: #22d3ee;
   --color-cyan-500: #06b6d4;
+  --color-teal-300: #5eead4;
   --color-teal-400: #2dd4bf;
   --color-teal-500: #14b8a6;
+  --color-emerald-300: #6ee7b7;
   --color-emerald-400: #34d399;
+  --color-rose-300: #fda4af;
   --color-rose-400: #fb7185;
+  --color-amber-300: #fcd34d;
   --color-amber-400: #fbbf24;
 
   /* Scrollbar */
@@ -66,34 +72,40 @@
   --color-slate-800: #e2e8f0;
   /* Interactive Borders & Hover States */
   --color-slate-700: #cbd5e1;
-  /* Muted Icons & Dividers */
-  --color-slate-600: #94a3b8;
-  /* Captions & Subtle Labels */
-  --color-slate-500: #64748b;
-  /* Secondary Text (AA High Contrast) */
-  --color-slate-400: #475569;
-  /* Primary Body Text */
-  --color-slate-300: #334155;
-  /* Prominent Headings */
-  --color-slate-200: #1e293b;
-  /* High-Contrast Titles & Numbers */
-  --color-slate-100: #0f172a;
+  /* Muted Icons & Dividers (Clear slate) */
+  --color-slate-600: #64748b;
+  /* Captions & Subtle Labels (Legible mid-slate) */
+  --color-slate-500: #475569;
+  /* Secondary Text (AA High Contrast Slate-700) */
+  --color-slate-400: #334155;
+  /* Primary Body Text (Deep Slate-800) */
+  --color-slate-300: #1e293b;
+  /* Prominent Headings (Rich Slate-900) */
+  --color-slate-200: #0f172a;
+  /* High-Contrast Titles & Numbers (Slate-950) */
+  --color-slate-100: #020617;
   /* Maximum Pure Dark */
-  --color-slate-50:  #020617;
+  --color-slate-50:  #000000;
 
-  /* Accents in Light Mode */
-  --color-blue-400: #3b82f6;
-  --color-blue-500: #2563eb;
-  --color-blue-600: #1d4ed8;
-  --color-blue-700: #1e40af;
+  /* Accents in Light Mode (Deep, rich, high contrast) */
+  --color-blue-300: #1d4ed8;
+  --color-blue-400: #2563eb;
+  --color-blue-500: #1d4ed8;
+  --color-blue-600: #1e40af;
+  --color-blue-700: #1e3a8a;
 
-  /* Semantic Accents */
+  /* Semantic Accents (High-Contrast for Light Mode) */
+  --color-cyan-300: #0e7490;
   --color-cyan-400: #0891b2;
   --color-cyan-500: #0e7490;
+  --color-teal-300: #0f766e;
   --color-teal-400: #0d9488;
   --color-teal-500: #0f766e;
+  --color-emerald-300: #047857;
   --color-emerald-400: #059669;
+  --color-rose-300: #be123c;
   --color-rose-400: #e11d48;
+  --color-amber-300: #b45309;
   --color-amber-400: #d97706;
 
   /* Scrollbar */
@@ -129,6 +141,14 @@
   border: 1px solid var(--color-slate-800);
   border-radius: 0.5rem;
   transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.bg-slate-850 {
+  background-color: var(--color-slate-850);
+}
+
+.border-slate-850 {
+  border-color: var(--color-slate-850);
 }
 
 /* Backward-compatible alias for existing templates */

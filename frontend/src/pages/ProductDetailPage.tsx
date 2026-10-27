@@ -122,7 +122,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition"
+          className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-100 transition"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Product List</span>
@@ -179,7 +179,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           </div>
           <button
             onClick={() => setParityResult(null)}
-            className="text-xs underline text-slate-400 hover:text-white"
+            className="text-xs underline text-slate-400 hover:text-slate-100"
           >
             Dismiss
           </button>
@@ -246,7 +246,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           </div>
           <button
             onClick={fetchProductAndMovements}
-            className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition"
+            className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-100 transition"
             title="Refresh Ledger"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -261,7 +261,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider">
+                <tr className="border-b border-slate-800 bg-slate-850 text-slate-400 text-xs font-semibold uppercase tracking-wider">
                   <th className="py-3 px-4 font-semibold">Date & Time</th>
                   <th className="py-3 px-4 font-semibold">Operation Type</th>
                   <th className="py-3 px-4 font-semibold">Quantity</th>

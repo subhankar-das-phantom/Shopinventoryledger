@@ -263,7 +263,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg transition disabled:opacity-40 disabled:pointer-events-none"
+            className="text-slate-400 hover:text-slate-100 hover:bg-slate-800 p-1.5 rounded-lg transition disabled:opacity-40 disabled:pointer-events-none"
             disabled={submitting || Boolean(successMessage)}
             title="Close"
           >
@@ -303,7 +303,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
                     onClick={() => setMovementType(item.type)}
                     className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs font-medium transition text-left ${
                       isSelected
-                        ? 'bg-slate-800 border-blue-500 text-white shadow-sm shadow-blue-500/20'
+                        ? 'bg-slate-800 border-blue-500 text-slate-100 font-semibold shadow-sm shadow-blue-500/20'
                         : 'border-slate-800 bg-slate-900/70 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                     }`}
                   >
@@ -401,7 +401,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
                     onClick={() => {
                       setProductSearchText('');
                     }}
-                    className="absolute right-2.5 top-2.5 p-0.5 text-slate-400 hover:text-white rounded"
+                    className="absolute right-2.5 top-2.5 p-0.5 text-slate-400 hover:text-slate-100 rounded"
                     title="Clear search"
                   >
                     <X className="w-4 h-4" />
@@ -541,7 +541,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={submitting || Boolean(successMessage)}
-              className="px-4 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none transition"
+              className="px-4 py-2 rounded-lg text-sm text-slate-300 hover:text-slate-100 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none transition"
             >
               Cancel
             </button>

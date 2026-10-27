@@ -204,7 +204,7 @@ export const MovementsPage: React.FC = () => {
                   setShowProductDropdown(false);
                   setPage(1);
                 }}
-                className="absolute right-2 top-2 p-0.5 text-slate-400 hover:text-white"
+                className="absolute right-2 top-2 p-0.5 text-slate-400 hover:text-slate-100"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -300,7 +300,7 @@ export const MovementsPage: React.FC = () => {
         {(selectedType !== 'all' || selectedProductId || dateFrom || dateTo) && (
           <button
             onClick={handleResetFilters}
-            className="text-xs text-rose-400 hover:text-rose-300 font-medium underline sm:self-end sm:mb-1.5 ml-auto"
+            className="text-xs text-rose-400 hover:text-rose-500 font-medium underline sm:self-end sm:mb-1.5 ml-auto"
           >
             Reset Filters
           </button>
@@ -319,7 +319,7 @@ export const MovementsPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider">
+                <tr className="border-b border-slate-800 bg-slate-850 text-slate-400 text-xs font-semibold uppercase tracking-wider">
                   <th className="py-3 px-4 font-semibold">Timestamp</th>
                   <th className="py-3 px-4 font-semibold">Product</th>
                   <th className="py-3 px-4 font-semibold">Movement Type</th>
