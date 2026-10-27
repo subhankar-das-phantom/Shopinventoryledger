@@ -1,0 +1,23 @@
+{
+  "name": "shop-inventory-ledger-workspace",
+  "version": "1.0.0",
+  "description": "Accounting-grade shop inventory ledger monorepo workspace",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "seed": "npm --prefix backend run seed",
+    "verify": "npm --prefix backend run verify",
+    "test": "npm --prefix backend test",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm run build:backend && npm run build:frontend"
+  },
+  "keywords": [
+    "inventory",
+    "ledger",
+    "audit",
+    "accounting"
+  ],
+  "author": "",
+  "license": "ISC"
+}
