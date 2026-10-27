@@ -283,23 +283,25 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-            <button
-              onClick={() => setShowExportModal(true)}
-              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3.5 py-2 rounded-lg text-xs font-semibold transition active:scale-95 shadow-sm"
-              title="Export Catalog (Excel, CSV, JSON)"
-            >
-              <Download className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Export</span>
-            </button>
-
             {isOwner && (
-              <button
-                onClick={() => onOpenProductModal()}
-                className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Product</span>
-              </button>
+              <>
+                <button
+                  onClick={() => setShowExportModal(true)}
+                  className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3.5 py-2 rounded-lg text-xs font-semibold transition active:scale-95 shadow-sm"
+                  title="Export Catalog (Excel, CSV, JSON, PDF)"
+                >
+                  <Download className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Export</span>
+                </button>
+
+                <button
+                  onClick={() => onOpenProductModal()}
+                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Product</span>
+                </button>
+              </>
             )}
 
             <button

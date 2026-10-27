@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../context/AuthContext.js';
 import { api, extractErrorMessage, downloadFile } from '../api/client.js';
 import { StockMovement, Product } from '../types/index.js';
 import { MovementTypeBadge } from '../components/Badge.js';
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 
 export const MovementsPage: React.FC = () => {
+  const { isOwner } = useAuth();
   const [movements, setMovements] = useState<StockMovement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -149,14 +151,16 @@ export const MovementsPage: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => setShowExportModal(true)}
-            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3.5 py-2 rounded-lg text-xs font-semibold transition active:scale-95 shadow-sm"
-            title="Export Ledger History (Excel, CSV, JSON)"
-          >
-            <Download className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Export</span>
-          </button>
+          {isOwner && (
+            <button
+              onClick={() => setShowExportModal(true)}
+              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3.5 py-2 rounded-lg text-xs font-semibold transition active:scale-95 shadow-sm"
+              title="Export Ledger History (Excel, CSV, JSON, PDF)"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Export</span>
+            </button>
+          )}
           <button
             onClick={fetchMovements}
             className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"

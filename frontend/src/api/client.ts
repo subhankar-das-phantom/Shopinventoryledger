@@ -50,36 +50,51 @@ export const downloadFile = async (
   params: Record<string, any> = {},
   fallbackFilename: string = 'export'
 ): Promise<void> => {
-  const response = await api.get(endpoint, {
-    params,
-    responseType: 'blob'
-  });
+  try {
+    const response = await api.get(endpoint, {
+      params,
+      responseType: 'blob'
+    });
 
-  let filename = fallbackFilename;
-  const disposition = response.headers['content-disposition']
-    ? String(response.headers['content-disposition'])
-    : '';
-  if (disposition) {
-    const match = disposition.match(/filename="?([^";]+)"?/);
-    if (match && match[1]) {
-      filename = match[1];
+    let filename = fallbackFilename;
+    const disposition = response.headers['content-disposition']
+      ? String(response.headers['content-disposition'])
+      : '';
+    if (disposition) {
+      const match = disposition.match(/filename="?([^";]+)"?/);
+      if (match && match[1]) {
+        filename = match[1];
+      }
     }
+
+    const contentType = response.headers['content-type']
+      ? String(response.headers['content-type'])
+      : 'application/octet-stream';
+
+    const blob = new Blob([response.data], {
+      type: contentType
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error: any) {
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text();
+        const json = JSON.parse(text);
+        if (json.message) {
+          error.message = json.message;
+        }
+      } catch {
+        // Fallback to error.message
+      }
+    }
+    throw error;
   }
-
-  const contentType = response.headers['content-type']
-    ? String(response.headers['content-type'])
-    : 'application/octet-stream';
-
-  const blob = new Blob([response.data], {
-    type: contentType
-  });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
 };
 
