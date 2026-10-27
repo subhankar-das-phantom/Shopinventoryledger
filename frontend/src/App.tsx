@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.js';
-import { Navbar } from './components/Navbar.js';
+import { Sidebar } from './components/Sidebar.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { DashboardPage } from './pages/DashboardPage.js';
 import { ProductsPage } from './pages/ProductsPage.js';
@@ -77,15 +77,16 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Navbar
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col lg:flex-row">
+      <Sidebar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
         onOpenMovementModal={() => handleOpenMovementModal()}
         lowStockCount={lowStockCount}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {currentTab === 'dashboard' && (
           <DashboardPage
             onNavigate={(tab) => setCurrentTab(tab)}
@@ -121,6 +122,7 @@ const AppContent: React.FC = () => {
 
         {currentTab === 'staff' && <StaffPage />}
       </main>
+      </div>
 
       {/* Global Modals */}
       <RecordMovementModal
