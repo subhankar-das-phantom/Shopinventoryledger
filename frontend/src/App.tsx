@@ -44,6 +44,15 @@ const AppContent: React.FC = () => {
   // Low stock counter for header badge
   const [lowStockCount, setLowStockCount] = useState<number>(0);
 
+  // Global catalog refresh trigger version counter
+  const [catalogRefreshTrigger, setCatalogRefreshTrigger] = useState<number>(0);
+
+  const triggerCatalogRefresh = () => {
+    setCatalogRefreshTrigger((prev) => prev + 1);
+    fetchLowStockCount();
+    window.dispatchEvent(new CustomEvent('catalog-updated'));
+  };
+
   const fetchLowStockCount = async () => {
     try {
       const res = await api.get('/stock/low-stock');
@@ -118,14 +127,6 @@ const AppContent: React.FC = () => {
     } else {
       setMobileDrawerOpen((prev) => !prev);
     }
-  };
-
-  // Global catalog refresh trigger version counter
-  const [catalogRefreshTrigger, setCatalogRefreshTrigger] = useState<number>(0);
-  const triggerCatalogRefresh = () => {
-    setCatalogRefreshTrigger((prev) => prev + 1);
-    fetchLowStockCount();
-    window.dispatchEvent(new CustomEvent('catalog-updated'));
   };
 
   return (
