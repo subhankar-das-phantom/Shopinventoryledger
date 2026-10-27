@@ -110,9 +110,15 @@ jobs:
       # OR if explicitly requested via manual dispatch (inputs.reseed == true).
       # This prevents CI from wiping or duplicating data in your live MongoDB Atlas cluster!
       - name: Seed Demo Ledger (Ephemeral CI Container Only)
-        if: ${{ secrets.MONGODB_URI == '' || inputs.reseed == true }}
         working-directory: backend
         run: |
+          TARGET_URI="${{ secrets.MONGODB_URI }}"
+          RESEED_FLAG="${{ inputs.reseed }}"
+          if [ -n "$TARGET_URI" ] && [ "$RESEED_FLAG" != "true" ]; then
+            echo "Skipping demo seeding: Remote database detected in MONGODB_URI secret. Preserving live data."
+            exit 0
+          fi
+
           export JWT_SECRET="${{ secrets.JWT_SECRET }}"
           if [ -z "$JWT_SECRET" ]; then
             export JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
