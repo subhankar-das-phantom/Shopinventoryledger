@@ -33,7 +33,7 @@ interface MovementExportRow {
 export const exportController = {
   /**
    * Export Products Catalog with current stock and valuation metrics
-   * Supports: format=excel | csv | json
+   * Supports: format=excel | pdf | csv | json
    */
   async exportProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -214,7 +214,7 @@ export const exportController = {
 
   /**
    * Export Stock Ledger Movement History
-   * Supports: format=excel | csv | json
+   * Supports: format=excel | pdf | csv | json
    */
   async exportMovements(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {

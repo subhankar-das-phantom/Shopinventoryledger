@@ -2,6 +2,7 @@ import { ExportDefinition } from './types.js';
 import { buildWorkbook } from './excel.js';
 import { buildCSV } from './csv.js';
 import { buildJSON } from './json.js';
+import { buildPDF, streamPDF } from './pdf.js';
 import { sanitizeFilename } from './helpers.js';
 
 export * from './types.js';
@@ -9,6 +10,7 @@ export * from './helpers.js';
 export * from './excel.js';
 export * from './csv.js';
 export * from './json.js';
+export * from './pdf.js';
 
 export interface ExportResult {
   buffer: Buffer | string;
@@ -17,7 +19,7 @@ export interface ExportResult {
 }
 
 /**
- * Dispatcher: takes an ExportDefinition and desired format ('excel' | 'csv' | 'json')
+ * Dispatcher: takes an ExportDefinition and desired format ('excel' | 'pdf' | 'csv' | 'json')
  * and returns the formatted payload, proper content-type, and full filename.
  */
 export const generateExport = async <T = any>(
@@ -33,6 +35,15 @@ export const generateExport = async <T = any>(
       buffer,
       contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       filename: `${baseName}.xlsx`
+    };
+  }
+
+  if (normalizedFormat === 'pdf') {
+    const buffer = await buildPDF(definition);
+    return {
+      buffer,
+      contentType: 'application/pdf',
+      filename: `${baseName}.pdf`
     };
   }
 

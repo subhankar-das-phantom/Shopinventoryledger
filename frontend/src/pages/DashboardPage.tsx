@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext.js';
-import { api, extractErrorMessage } from '../api/client.js';
+import { api, downloadFile, extractErrorMessage } from '../api/client.js';
 import { StockMovement, LowStockProduct, AnalyticsData } from '../types/index.js';
 import { MovementTypeBadge, StockStatusBadge } from '../components/Badge.js';
+import { ExportModal, ExportFormat } from '../components/ExportModal.js';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -169,21 +170,18 @@ export const DashboardPage: React.FC<DashboardProps> = ({
     fetchDashboardData();
   }, [timeHorizon]);
 
-  const handleExportCsv = async () => {
+  const [showExportModal, setShowExportModal] = useState<boolean>(false);
+
+  const handleExportSubmit = async ({ format }: { format: ExportFormat }) => {
     try {
-      const response = await api.get('/stock/report.csv', { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute(
-        'download',
-        `shop_inventory_report_${new Date().toISOString().slice(0, 10)}.csv`
+      await downloadFile(
+        '/products/export',
+        { format },
+        `shop_inventory_ledger_${new Date().toISOString().slice(0, 10)}.${format === 'excel' ? 'xlsx' : format}`
       );
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
     } catch (err: any) {
       alert(`Export failed: ${extractErrorMessage(err)}`);
+      throw err;
     }
   };
 
@@ -247,11 +245,11 @@ export const DashboardPage: React.FC<DashboardProps> = ({
               </button>
 
               <button
-                onClick={handleExportCsv}
+                onClick={() => setShowExportModal(true)}
                 className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3 py-1.5 rounded-lg text-xs font-medium transition active:scale-95"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Export CSV</span>
+                <span>Export Ledger</span>
               </button>
             </>
           )}
@@ -830,6 +828,18 @@ export const DashboardPage: React.FC<DashboardProps> = ({
           </div>
         </div>
       </div>
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        title="Export Inventory Ledger"
+        subtitle="Export full catalog inventory valuation, current stock levels, and KPI balances"
+        entityName="All Products"
+        stats={{
+          total: summary?.activeSkus ?? 0,
+          label: 'Master Catalog Ledger'
+        }}
+        onExport={handleExportSubmit}
+      />
     </div>
   );
 };

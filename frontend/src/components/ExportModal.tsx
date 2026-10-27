@@ -11,7 +11,7 @@ import {
   Layers
 } from 'lucide-react';
 
-export type ExportFormat = 'excel' | 'csv' | 'json';
+export type ExportFormat = 'excel' | 'pdf' | 'csv' | 'json';
 
 export interface ExportDateRange {
   startDate: string;
@@ -129,6 +129,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       icon: FileSpreadsheet,
       accentColor: 'text-emerald-400',
       activeBorder: 'border-emerald-500/60 bg-emerald-500/5'
+    },
+    {
+      id: 'pdf' as ExportFormat,
+      name: 'PDF Document (.pdf)',
+      badge: 'Print / Audit',
+      badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+      description: 'Landscape executive report with ledger totals, KPI summary card, and pagination.',
+      icon: FileText,
+      accentColor: 'text-rose-400',
+      activeBorder: 'border-rose-500/60 bg-rose-500/5'
     },
     {
       id: 'csv' as ExportFormat,

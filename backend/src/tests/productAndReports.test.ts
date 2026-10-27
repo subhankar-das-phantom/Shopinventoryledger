@@ -196,7 +196,7 @@ describe('Products, Low-Stock Calculations & CSV Security', () => {
     expect(csvText).toContain("'@pcs");
   });
 
-  it('Multi-format export /api/products/export supports Excel, CSV, and JSON', async () => {
+  it('Multi-format export /api/products/export supports Excel, PDF, CSV, and JSON', async () => {
     await Product.create({
       sku: 'EXP-1',
       name: 'Exportable Widget',
@@ -216,7 +216,17 @@ describe('Products, Low-Stock Calculations & CSV Security', () => {
     expect(excelRes.headers['content-type']).toContain('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     expect(excelRes.headers['content-disposition']).toContain('.xlsx');
 
-    // 2. Test CSV export
+    // 2. Test PDF export
+    const pdfRes = await request(app)
+      .get('/api/products/export?format=pdf')
+      .set('Authorization', `Bearer ${ownerToken}`);
+
+    expect(pdfRes.status).toBe(200);
+    expect(pdfRes.headers['content-type']).toContain('application/pdf');
+    expect(pdfRes.headers['content-disposition']).toContain('.pdf');
+    expect(pdfRes.body.toString('latin1')).toMatch(/^%PDF-/);
+
+    // 3. Test CSV export
     const csvRes = await request(app)
       .get('/api/products/export?format=csv')
       .set('Authorization', `Bearer ${ownerToken}`);
@@ -225,7 +235,7 @@ describe('Products, Low-Stock Calculations & CSV Security', () => {
     expect(csvRes.headers['content-type']).toContain('text/csv');
     expect(csvRes.text).toContain('Exportable Widget');
 
-    // 3. Test JSON export
+    // 4. Test JSON export
     const jsonRes = await request(app)
       .get('/api/products/export?format=json')
       .set('Authorization', `Bearer ${ownerToken}`);
