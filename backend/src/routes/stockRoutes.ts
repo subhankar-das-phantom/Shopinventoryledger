@@ -49,6 +49,15 @@ stockMovementRouter.post(
   stockMovementController.recordAdjustment
 );
 
+import { exportController } from '../controllers/exportController.js';
+
+// Export stock movements ledger (Owner only)
+stockMovementRouter.get(
+  '/export',
+  requireRole('OWNER'),
+  exportController.exportMovements
+);
+
 // Bounded list of all movements with filters
 stockMovementRouter.get(
   '/',

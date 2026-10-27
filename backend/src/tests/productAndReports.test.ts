@@ -195,4 +195,44 @@ describe('Products, Low-Stock Calculations & CSV Security', () => {
     expect(csvText).toContain("'+DangerousCategory");
     expect(csvText).toContain("'@pcs");
   });
+
+  it('Multi-format export /api/products/export supports Excel, CSV, and JSON', async () => {
+    await Product.create({
+      sku: 'EXP-1',
+      name: 'Exportable Widget',
+      category: 'Gadgets',
+      unit: 'pcs',
+      price: 150,
+      lowStockThreshold: 10,
+      isActive: true
+    });
+
+    // 1. Test Excel export
+    const excelRes = await request(app)
+      .get('/api/products/export?format=excel')
+      .set('Authorization', `Bearer ${ownerToken}`);
+
+    expect(excelRes.status).toBe(200);
+    expect(excelRes.headers['content-type']).toContain('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    expect(excelRes.headers['content-disposition']).toContain('.xlsx');
+
+    // 2. Test CSV export
+    const csvRes = await request(app)
+      .get('/api/products/export?format=csv')
+      .set('Authorization', `Bearer ${ownerToken}`);
+
+    expect(csvRes.status).toBe(200);
+    expect(csvRes.headers['content-type']).toContain('text/csv');
+    expect(csvRes.text).toContain('Exportable Widget');
+
+    // 3. Test JSON export
+    const jsonRes = await request(app)
+      .get('/api/products/export?format=json')
+      .set('Authorization', `Bearer ${ownerToken}`);
+
+    expect(jsonRes.status).toBe(200);
+    expect(jsonRes.headers['content-type']).toContain('application/json');
+    expect(jsonRes.body.reportTitle).toBe('Inventory & Stock Valuation Report');
+    expect(jsonRes.body.data.length).toBeGreaterThan(0);
+  });
 });

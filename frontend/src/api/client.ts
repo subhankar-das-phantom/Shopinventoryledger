@@ -37,3 +37,43 @@ export const extractErrorMessage = (error: any): string => {
 export const createIdempotencyKey = (prefix: string = 'req'): string => {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 };
+
+// Reusable file download helper for Excel/CSV/JSON exports
+export const downloadFile = async (
+  endpoint: string,
+  params: Record<string, any> = {},
+  fallbackFilename: string = 'export'
+): Promise<void> => {
+  const response = await api.get(endpoint, {
+    params,
+    responseType: 'blob'
+  });
+
+  let filename = fallbackFilename;
+  const disposition = response.headers['content-disposition']
+    ? String(response.headers['content-disposition'])
+    : '';
+  if (disposition) {
+    const match = disposition.match(/filename="?([^";]+)"?/);
+    if (match && match[1]) {
+      filename = match[1];
+    }
+  }
+
+  const contentType = response.headers['content-type']
+    ? String(response.headers['content-type'])
+    : 'application/octet-stream';
+
+  const blob = new Blob([response.data], {
+    type: contentType
+  });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+

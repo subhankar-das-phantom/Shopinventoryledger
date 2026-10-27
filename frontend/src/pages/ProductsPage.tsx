@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.js';
-import { api, extractErrorMessage } from '../api/client.js';
+import { api, extractErrorMessage, downloadFile } from '../api/client.js';
 import { Product } from '../types/index.js';
 import { StockStatusBadge } from '../components/Badge.js';
 import { ConfirmDialog } from '../components/ConfirmDialog.js';
+import { ExportModal, ExportFormat } from '../components/ExportModal.js';
 import {
   Search,
   Plus,
@@ -67,6 +68,9 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
   const [deactivatingProduct, setDeactivatingProduct] = useState<Product | null>(null);
   const [deactivatingLoading, setDeactivatingLoading] = useState(false);
 
+  // Multi-format export modal state
+  const [showExportModal, setShowExportModal] = useState(false);
+
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -119,18 +123,29 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
     flushSearch();
   };
 
-  const handleExportCsv = async () => {
+  const handleExportSubmit = async ({ format }: { format: ExportFormat }) => {
     try {
-      const response = await api.get('/stock/report.csv', { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `catalog_inventory_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      const params: Record<string, any> = { format };
+      if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
+      if (selectedCategory !== 'all') params.category = selectedCategory;
+      if (stockFilter !== 'all') {
+        const filterMap: Record<string, string> = {
+          low: 'low_stock',
+          out: 'out_of_stock',
+          in: 'in_stock',
+          deactivated: 'deactivated'
+        };
+        params.stockFilter = filterMap[stockFilter] || stockFilter;
+      }
+
+      await downloadFile(
+        '/products/export',
+        params,
+        `products_export_${new Date().toISOString().split('T')[0]}.${format === 'excel' ? 'xlsx' : format}`
+      );
     } catch (err: any) {
       alert(`Export failed: ${extractErrorMessage(err)}`);
+      throw err;
     }
   };
 
@@ -269,12 +284,12 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
 
           <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
             <button
-              onClick={handleExportCsv}
+              onClick={() => setShowExportModal(true)}
               className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3.5 py-2 rounded-lg text-xs font-semibold transition active:scale-95 shadow-sm"
-              title="Export Products as CSV"
+              title="Export Catalog (Excel, CSV, JSON)"
             >
               <Download className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Export CSV</span>
+              <span>Export</span>
             </button>
 
             {isOwner && (
@@ -621,6 +636,21 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
           </div>
         )}
       </div>
+
+      {/* Reusable Multi-Format Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        title="Export Products Catalog"
+        subtitle="Export product stock levels, valuation, and thresholds to Excel, CSV, or JSON"
+        entityName="Products"
+        stats={{
+          total: displayedProducts.length,
+          label: `${selectedCategory === 'all' ? 'All Categories' : selectedCategory} (${stockFilter.toUpperCase()})`
+        }}
+        defaultFormat="excel"
+        onExport={handleExportSubmit}
+      />
 
       {/* Confirmation Dialog for Deactivation */}
       <ConfirmDialog

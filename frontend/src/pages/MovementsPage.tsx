@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { api, extractErrorMessage } from '../api/client.js';
+import { api, extractErrorMessage, downloadFile } from '../api/client.js';
 import { StockMovement, Product } from '../types/index.js';
 import { MovementTypeBadge } from '../components/Badge.js';
 import { useDebounce } from '../hooks/index.js';
+import { ExportModal, ExportFormat } from '../components/ExportModal.js';
 import {
   RefreshCw,
   User as UserIcon,
   Search,
   X,
-  Loader2
+  Loader2,
+  Download
 } from 'lucide-react';
 
 export const MovementsPage: React.FC = () => {
@@ -113,6 +115,29 @@ export const MovementsPage: React.FC = () => {
     setPage(1);
   };
 
+  const [showExportModal, setShowExportModal] = useState<boolean>(false);
+
+  const handleExportSubmit = async ({ format, dateRange }: { format: ExportFormat; dateRange?: any }) => {
+    try {
+      const params: Record<string, any> = { format };
+      if (selectedType !== 'all') params.type = selectedType;
+      if (selectedProductId) params.productId = selectedProductId;
+      if (dateRange?.startDate) params.startDate = dateRange.startDate;
+      else if (dateFrom) params.startDate = dateFrom;
+      if (dateRange?.endDate) params.endDate = dateRange.endDate;
+      else if (dateTo) params.endDate = dateTo;
+
+      await downloadFile(
+        '/stock-movements/export',
+        params,
+        `stock_movements_${new Date().toISOString().split('T')[0]}.${format === 'excel' ? 'xlsx' : format}`
+      );
+    } catch (err: any) {
+      alert(`Export failed: ${extractErrorMessage(err)}`);
+      throw err;
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
@@ -123,13 +148,23 @@ export const MovementsPage: React.FC = () => {
             Immutable, bounded chronological audit trail of all inventory transactions
           </p>
         </div>
-        <button
-          onClick={fetchMovements}
-          className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition shrink-0"
-          title="Refresh Ledger"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setShowExportModal(true)}
+            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3.5 py-2 rounded-lg text-xs font-semibold transition active:scale-95 shadow-sm"
+            title="Export Ledger History (Excel, CSV, JSON)"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Export</span>
+          </button>
+          <button
+            onClick={fetchMovements}
+            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+            title="Refresh Ledger"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -386,6 +421,23 @@ export const MovementsPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Reusable Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        title="Export Stock Movements Ledger"
+        subtitle="Export immutable transaction history to Excel, CSV, or JSON"
+        entityName="Stock Movements"
+        stats={{
+          total: totalMovements,
+          label: selectedProductId ? `Product: ${selectedProductName}` : 'All Products'
+        }}
+        showDateRange={true}
+        defaultFormat="excel"
+        onExport={handleExportSubmit}
+      />
     </div>
   );
 };
+

@@ -11,8 +11,13 @@ import { validateRequest } from '../middleware/validate.js';
 
 const router = Router();
 
+import { exportController } from '../controllers/exportController.js';
+
 // All product routes require authentication
 router.use(authenticate);
+
+// Export products (Owner only) - Must be before /:id
+router.get('/export', requireRole('OWNER'), exportController.exportProducts);
 
 // Staff and Owner can view products
 router.get('/', validateRequest(productListQuerySchema), productController.getProducts);
