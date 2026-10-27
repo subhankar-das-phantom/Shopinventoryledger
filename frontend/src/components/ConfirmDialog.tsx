@@ -51,7 +51,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="px-3 py-1.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition"
+            className="px-3 py-1.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed transition"
           >
             Cancel
           </button>
@@ -59,7 +59,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${buttonColors[confirmVariant]} disabled:opacity-50`}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${buttonColors[confirmVariant]} disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed select-none`}
           >
             {isLoading ? 'Processing...' : confirmLabel}
           </button>

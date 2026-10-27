@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api, extractErrorMessage } from '../api/client.js';
 import { Product } from '../types/index.js';
 import {
@@ -27,6 +27,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   productToEdit
 }) => {
   const isEditing = Boolean(productToEdit);
+  const isSubmittingRef = useRef<boolean>(false);
 
   const [sku, setSku] = useState('');
   const [name, setName] = useState('');
@@ -41,6 +42,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      isSubmittingRef.current = false;
+      setSubmitting(false);
       setError(null);
       if (productToEdit) {
         setSku(productToEdit.sku);
@@ -72,6 +75,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingRef.current || submitting) return;
+
     setError(null);
 
     const numPrice = parseFloat(price);
@@ -92,6 +97,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       return;
     }
 
+    isSubmittingRef.current = true;
     setSubmitting(true);
 
     try {
@@ -118,7 +124,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       onClose();
     } catch (err: any) {
       setError(extractErrorMessage(err));
-    } finally {
+      isSubmittingRef.current = false;
       setSubmitting(false);
     }
   };
@@ -326,14 +332,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700/60 transition"
+              className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none border border-slate-700/60 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition shadow-sm"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition shadow-sm select-none"
             >
               {submitting ? (
                 <>

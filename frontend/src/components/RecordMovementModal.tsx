@@ -50,6 +50,8 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const latestSearchRequestId = useRef<number>(0);
+  const isSubmittingRef = useRef<boolean>(false);
+  const idempotencyKeyRef = useRef<string>(createIdempotencyKey('mov'));
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +71,9 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
   // Modal open initialization
   useEffect(() => {
     if (isOpen) {
+      isSubmittingRef.current = false;
+      idempotencyKeyRef.current = createIdempotencyKey('mov');
+      setSubmitting(false);
       setError(null);
       setSuccessMessage(null);
       setProductSearchText('');
@@ -163,6 +168,11 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Guard against multiple synchronous or asynchronous invocations
+    if (isSubmittingRef.current || submitting || successMessage) {
+      return;
+    }
+
     setError(null);
     setSuccessMessage(null);
 
@@ -192,10 +202,11 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
       return;
     }
 
+    // Synchronously lock immediately before entering async execution
+    isSubmittingRef.current = true;
     setSubmitting(true);
 
     try {
-      const idempotencyKey = createIdempotencyKey('mov');
       let endpoint = '';
       let payload: any = {
         productId: selectedProductId,
@@ -217,20 +228,23 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
 
       const res = await api.post(endpoint, payload, {
         headers: {
-          'Idempotency-Key': idempotencyKey
+          'Idempotency-Key': idempotencyKeyRef.current
         }
       });
 
       if (res.data.success) {
         setSuccessMessage(`Movement recorded! New stock: ${res.data.data.currentStock} ${selectedProduct?.unit || 'units'}`);
+        // Remain permanently locked while displaying success message
         setTimeout(() => {
           onSuccess();
           onClose();
-        }, 1100);
+        }, 850);
       }
     } catch (err: any) {
       setError(extractErrorMessage(err));
-    } finally {
+      // Refresh idempotency key for retry if user fixes the form inputs
+      idempotencyKeyRef.current = createIdempotencyKey('mov');
+      isSubmittingRef.current = false;
       setSubmitting(false);
     }
   };
@@ -248,8 +262,9 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg transition"
-            disabled={submitting}
+            className="text-slate-400 hover:text-white p-1 rounded-lg transition disabled:opacity-40 disabled:pointer-events-none"
+            disabled={submitting || Boolean(successMessage)}
+            title="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -524,17 +539,22 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              disabled={submitting}
-              className="px-4 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800 transition"
+              disabled={submitting || Boolean(successMessage)}
+              className="px-4 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={submitting}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow-md shadow-blue-500/20"
+              disabled={submitting || Boolean(successMessage) || !selectedProductId}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none text-white px-5 py-2 rounded-lg text-sm font-semibold transition shadow-sm select-none"
             >
-              {submitting ? (
+              {successMessage ? (
+                <>
+                  <CheckCircle className="w-4 h-4 text-emerald-300" />
+                  <span>Posted Successfully</span>
+                </>
+              ) : submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Committing Ledger...</span>
