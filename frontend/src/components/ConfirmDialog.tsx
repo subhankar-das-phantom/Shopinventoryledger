@@ -27,7 +27,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const buttonColors = {
     danger: 'bg-rose-600 hover:bg-rose-500 text-white',
     warning: 'bg-amber-600 hover:bg-amber-500 text-white',
-    primary: 'bg-indigo-600 hover:bg-indigo-500 text-white'
+    primary: 'bg-blue-600 hover:bg-blue-500 text-white'
   };
 
   return (

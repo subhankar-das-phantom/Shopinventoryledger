@@ -207,7 +207,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
                     onClick={() => setMovementType(item.type)}
                     className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs font-medium transition text-left ${
                       isSelected
-                        ? 'bg-slate-800 border-indigo-500 text-white shadow-sm shadow-indigo-500/20'
+                        ? 'bg-slate-800 border-blue-500 text-white shadow-sm shadow-blue-500/20'
                         : 'border-slate-800 bg-slate-900/70 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                     }`}
                   >
@@ -231,7 +231,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
                 value={selectedProductId}
                 onChange={(e) => setSelectedProductId(e.target.value)}
                 required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
               >
                 {products.map((p) => (
                   <option key={p._id} value={p._id}>
@@ -266,7 +266,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
                 onChange={(e) => setQuantity(e.target.value)}
                 required
                 placeholder="1"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 font-mono"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 font-mono"
               />
             </div>
 
@@ -292,7 +292,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
               onChange={(e) => setReference(e.target.value)}
               placeholder="e.g. Invoice #1024, PO-2026-08, Receipt"
               maxLength={100}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
             />
           </div>
 
@@ -308,7 +308,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
               placeholder="e.g. Counter retail sale, Supplier replenishment, Damaged goods"
               required
               maxLength={500}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
             />
           </div>
 
@@ -325,7 +325,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow-md shadow-indigo-600/30"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow-md shadow-blue-500/20"
             >
               {submitting ? (
                 <>

@@ -148,7 +148,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               className={`w-full border rounded-lg px-3 py-2 text-sm font-mono uppercase focus:outline-none ${
                 isEditing
                   ? 'bg-slate-800/50 border-slate-800 text-slate-500 cursor-not-allowed'
-                  : 'bg-slate-800 border-slate-700 text-slate-200 focus:border-indigo-500'
+                  : 'bg-slate-800 border-slate-700 text-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30'
               }`}
             />
             {isEditing && (
@@ -168,7 +168,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               required
               placeholder="e.g. Whole Wheat Bread 400g"
               maxLength={150}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
             />
           </div>
 
@@ -185,7 +185,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 required
                 placeholder="e.g. Dairy, Bakery"
                 maxLength={80}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
               />
             </div>
 
@@ -200,7 +200,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 required
                 placeholder="e.g. pcs, pack, kg"
                 maxLength={20}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
               />
             </div>
           </div>
@@ -218,7 +218,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 font-mono"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 font-mono"
               />
             </div>
 
@@ -233,7 +233,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 value={lowStockThreshold}
                 onChange={(e) => setLowStockThreshold(e.target.value)}
                 required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 font-mono"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 font-mono"
               />
             </div>
           </div>
@@ -251,7 +251,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow-md shadow-indigo-600/30"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow-md shadow-blue-500/20"
             >
               {submitting ? (
                 <>

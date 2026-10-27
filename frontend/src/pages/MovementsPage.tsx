@@ -86,7 +86,7 @@ export const MovementsPage: React.FC = () => {
               setSelectedType(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+            className="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
           >
             <option value="all">All Movements</option>
             <option value="PURCHASE_IN">Purchases (IN)</option>
@@ -107,7 +107,7 @@ export const MovementsPage: React.FC = () => {
               setDateFrom(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-800 border border-slate-700 px-2.5 py-1.5 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+            className="bg-slate-800 border border-slate-700 px-2.5 py-1.5 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
           />
         </div>
 
@@ -120,7 +120,7 @@ export const MovementsPage: React.FC = () => {
               setDateTo(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-800 border border-slate-700 px-2.5 py-1.5 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+            className="bg-slate-800 border border-slate-700 px-2.5 py-1.5 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
           />
         </div>
 

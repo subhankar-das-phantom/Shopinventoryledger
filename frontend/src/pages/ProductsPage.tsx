@@ -105,7 +105,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
         {isOwner && (
           <button
             onClick={() => onOpenProductModal()}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md shadow-indigo-600/30"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md shadow-blue-500/20"
           >
             <Plus className="w-4 h-4" />
             <span>Add Product</span>
@@ -128,7 +128,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by product name or SKU..."
-            className="w-full bg-slate-800 border border-slate-700 pl-9 pr-3 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-slate-800 border border-slate-700 pl-9 pr-3 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
           />
         </form>
 
@@ -140,7 +140,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
               setSelectedCategory(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+            className="bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
           >
             <option value="all">All Categories</option>
             {categories.map((c) => (
@@ -157,7 +157,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
               setSelectedStatus(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+            className="bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
           >
             <option value="active">Active Products</option>
             <option value="inactive">Deactivated</option>
@@ -211,7 +211,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                     <td className="py-3 px-4">
                       <div
                         onClick={() => onSelectProduct(p._id)}
-                        className="font-medium text-slate-200 hover:text-indigo-400 cursor-pointer transition"
+                        className="font-medium text-slate-200 hover:text-blue-400 cursor-pointer transition"
                       >
                         {p.name}
                       </div>
@@ -253,7 +253,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                         <button
                           onClick={() => onSelectProduct(p._id)}
                           title="View Ledger History"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-blue-400 hover:bg-slate-800 transition"
                         >
                           <History className="w-4 h-4" />
                         </button>

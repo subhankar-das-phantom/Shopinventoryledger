@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.js';
 import { Sidebar } from './components/Sidebar.js';
+import { Header } from './components/Header.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { DashboardPage } from './pages/DashboardPage.js';
 import { ProductsPage } from './pages/ProductsPage.js';
@@ -18,6 +19,18 @@ const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+
+  // Desktop sidebar collapsed state
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('shop-ledger-sidebar-collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  // Mobile drawer open state
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState<boolean>(false);
 
   // Modals state
   const [movementModalOpen, setMovementModalOpen] = useState(false);
@@ -47,10 +60,28 @@ const AppContent: React.FC = () => {
     }
   }, [user, currentTab]);
 
+  // Global Ctrl+B shortcut to toggle sidebar collapse
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        if (window.innerWidth >= 1024) {
+          e.preventDefault();
+          setIsSidebarCollapsed((prev) => {
+            const next = !prev;
+            localStorage.setItem('shop-ledger-sidebar-collapsed', String(next));
+            return next;
+          });
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-400 gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      <div className="min-h-screen bg-[#09090b] flex flex-col items-center justify-center text-slate-400 gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         <span className="text-sm font-medium">Loading Shop Inventory Ledger...</span>
       </div>
     );
@@ -76,52 +107,80 @@ const AppContent: React.FC = () => {
     setCurrentTab('product-detail');
   };
 
+  const handleToggleSidebar = () => {
+    if (window.innerWidth >= 1024) {
+      setIsSidebarCollapsed((prev) => {
+        const next = !prev;
+        localStorage.setItem('shop-ledger-sidebar-collapsed', String(next));
+        return next;
+      });
+    } else {
+      setMobileDrawerOpen((prev) => !prev);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#09090b] text-slate-100 flex overflow-hidden">
+      {/* Responsive Collapsible Sidebar */}
       <Sidebar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
         onOpenMovementModal={() => handleOpenMovementModal()}
         lowStockCount={lowStockCount}
+        isCollapsed={isSidebarCollapsed}
+        mobileOpen={mobileDrawerOpen}
+        onCloseMobile={() => setMobileDrawerOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {currentTab === 'dashboard' && (
-          <DashboardPage
-            onNavigate={(tab) => setCurrentTab(tab)}
-            onOpenMovementModal={handleOpenMovementModal}
-            onOpenProductModal={() => handleOpenProductModal()}
-          />
-        )}
+      {/* Main App Container */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-[#09090b]">
+        {/* Top Header */}
+        <Header
+          currentTab={currentTab}
+          onToggleSidebar={handleToggleSidebar}
+          isSidebarCollapsed={isSidebarCollapsed}
+          onOpenMovementModal={() => handleOpenMovementModal()}
+        />
 
-        {currentTab === 'products' && (
-          <ProductsPage
-            onSelectProduct={handleSelectProduct}
-            onOpenProductModal={handleOpenProductModal}
-            onOpenMovementModal={handleOpenMovementModal}
-          />
-        )}
+        {/* Scrollable Viewport */}
+        <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {currentTab === 'dashboard' && (
+              <DashboardPage
+                onNavigate={(tab) => setCurrentTab(tab)}
+                onOpenMovementModal={handleOpenMovementModal}
+                onOpenProductModal={() => handleOpenProductModal()}
+              />
+            )}
 
-        {currentTab === 'product-detail' && selectedProductId && (
-          <ProductDetailPage
-            productId={selectedProductId}
-            onBack={() => setCurrentTab('products')}
-            onOpenMovementModal={handleOpenMovementModal}
-          />
-        )}
+            {currentTab === 'products' && (
+              <ProductsPage
+                onSelectProduct={handleSelectProduct}
+                onOpenProductModal={handleOpenProductModal}
+                onOpenMovementModal={handleOpenMovementModal}
+              />
+            )}
 
-        {currentTab === 'movements' && <MovementsPage />}
+            {currentTab === 'product-detail' && selectedProductId && (
+              <ProductDetailPage
+                productId={selectedProductId}
+                onBack={() => setCurrentTab('products')}
+                onOpenMovementModal={handleOpenMovementModal}
+              />
+            )}
 
-        {currentTab === 'low-stock' && (
-          <LowStockPage
-            onOpenMovementModal={handleOpenMovementModal}
-            onSelectProduct={handleSelectProduct}
-          />
-        )}
+            {currentTab === 'movements' && <MovementsPage />}
 
-        {currentTab === 'staff' && <StaffPage />}
-      </main>
+            {currentTab === 'low-stock' && (
+              <LowStockPage
+                onOpenMovementModal={handleOpenMovementModal}
+                onSelectProduct={handleSelectProduct}
+              />
+            )}
+
+            {currentTab === 'staff' && <StaffPage />}
+          </div>
+        </main>
       </div>
 
       {/* Global Modals */}

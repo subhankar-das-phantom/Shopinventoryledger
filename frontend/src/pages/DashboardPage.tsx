@@ -14,7 +14,9 @@ import {
   RefreshCw,
   CheckCircle2,
   Clock,
-  Layers
+  Layers,
+  AlertOctagon,
+  ChevronRight
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -71,7 +73,10 @@ export const DashboardPage: React.FC<DashboardProps> = ({
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `shop_inventory_report_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute(
+        'download',
+        `shop_inventory_report_${new Date().toISOString().slice(0, 10)}.csv`
+      );
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -82,37 +87,47 @@ export const DashboardPage: React.FC<DashboardProps> = ({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      {/* Top Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Inventory Overview</h1>
-          <p className="text-sm text-slate-400 mt-0.5">
-            Real-time stock calculated dynamically from the immutable movement ledger
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-white tracking-tight">
+              Inventory Ledger Overview
+            </h1>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              Live Ledger
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            Accounting-grade physical stock balances computed in real-time from immutable movement records
           </p>
         </div>
+
         <div className="flex items-center gap-2.5">
           <button
             onClick={fetchDashboardData}
             title="Refresh Ledger"
             disabled={loading}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+            className="p-2 rounded-xl bg-[#141519] border border-white/[0.08] hover:bg-slate-800 text-slate-300 transition-colors shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-400' : ''}`} />
           </button>
+
           {isOwner && (
             <>
               <button
                 onClick={onOpenProductModal}
-                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition"
+                className="flex items-center gap-2 bg-[#17181e] hover:bg-slate-800 text-slate-200 border border-white/[0.08] px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-sm active:scale-95"
               >
-                <Package className="w-4 h-4" />
+                <Package className="w-3.5 h-3.5 text-blue-400" />
                 <span>Add Product</span>
               </button>
+
               <button
                 onClick={handleExportCsv}
-                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-2 rounded-lg text-sm font-medium transition"
+                className="flex items-center gap-2 bg-[#17181e] hover:bg-slate-800 text-slate-200 border border-white/[0.08] px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-sm active:scale-95"
               >
-                <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Export CSV</span>
               </button>
             </>
@@ -121,140 +136,208 @@ export const DashboardPage: React.FC<DashboardProps> = ({
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-950/60 border border-rose-800 rounded-xl text-rose-200 text-sm">
-          {error}
+        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-300 text-sm flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
-      {/* Metrics Row */}
+      {/* Primary KPI Metrics Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1 */}
-        <div className="bg-slate-800/60 border border-slate-800 p-4 rounded-xl relative overflow-hidden">
+        {/* Metric 1: Active Catalog */}
+        <div className="glass-card rounded-2xl p-5 relative overflow-hidden transition-all duration-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Catalog</span>
-            <Package className="w-4 h-4 text-indigo-400" />
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              Active Catalog
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <Package className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-white mt-2 font-mono">
+          <div className="text-3xl font-bold text-white mt-3 font-mono tracking-tight">
             {totalActiveSkus}
           </div>
-          <div className="text-xs text-slate-400 mt-1">Unique active SKUs</div>
+          <div className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+            <span>Unique active products</span>
+          </div>
         </div>
 
-        {/* Metric 2 */}
-        <div className="bg-slate-800/60 border border-slate-800 p-4 rounded-xl relative overflow-hidden">
+        {/* Metric 2: Physical Balance */}
+        <div className="glass-card rounded-2xl p-5 relative overflow-hidden transition-all duration-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Physical Balance</span>
-            <Layers className="w-4 h-4 text-teal-400" />
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              Total Physical Stock
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
+              <Layers className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-white mt-2 font-mono">
+          <div className="text-3xl font-bold text-white mt-3 font-mono tracking-tight">
             {totalStockUnits.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-400 mt-1">Total combined stock units</div>
+          <div className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+            <span>Sum of all verified balances</span>
+          </div>
         </div>
 
-        {/* Metric 3 */}
+        {/* Metric 3: Low Stock Alerts */}
         <div
           onClick={() => onNavigate('low-stock')}
-          className="bg-slate-800/60 border border-slate-800 hover:border-amber-700/50 p-4 rounded-xl relative overflow-hidden cursor-pointer transition"
+          className="glass-card rounded-2xl p-5 relative overflow-hidden cursor-pointer hover:border-amber-500/30 transition-all duration-200"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-amber-400 uppercase tracking-wider">Low Stock</span>
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <span className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">
+              Low Stock Alerts
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-amber-300 mt-2 font-mono">
+          <div className="text-3xl font-bold text-amber-300 mt-3 font-mono tracking-tight">
             {lowStockCount}
           </div>
-          <div className="text-xs text-slate-400 mt-1">Items at or below threshold</div>
+          <div className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span>At or below min threshold</span>
+          </div>
         </div>
 
-        {/* Metric 4 */}
+        {/* Metric 4: Out of Stock */}
         <div
           onClick={() => onNavigate('low-stock')}
-          className="bg-slate-800/60 border border-slate-800 hover:border-rose-700/50 p-4 rounded-xl relative overflow-hidden cursor-pointer transition"
+          className="glass-card rounded-2xl p-5 relative overflow-hidden cursor-pointer hover:border-rose-500/30 transition-all duration-200"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-rose-400 uppercase tracking-wider">Out of Stock</span>
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            <span className="text-[11px] font-semibold text-rose-400 uppercase tracking-wider">
+              Out of Stock
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+              <AlertOctagon className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-rose-300 mt-2 font-mono">
+          <div className="text-3xl font-bold text-rose-300 mt-3 font-mono tracking-tight">
             {outOfStockCount}
           </div>
-          <div className="text-xs text-slate-400 mt-1">Zero balance items</div>
+          <div className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+            <span>Zero balance items</span>
+          </div>
         </div>
       </div>
 
-      {/* Quick Operational Shortcuts */}
-      <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-4">
-        <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-          Quick Ledger Operations
+      {/* Quick Operation Cards */}
+      <div className="bg-[#121316] border border-white/[0.06] rounded-2xl p-5">
+        <div className="flex items-center justify-between mb-3.5">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            Quick Ledger Transactions
+          </span>
+          <span className="text-[11px] text-slate-500 font-mono">
+            Direct state-changing operations
+          </span>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <button
             onClick={() => onOpenMovementModal('SALE_OUT')}
-            className="flex items-center gap-2.5 p-3 rounded-lg bg-rose-950/40 border border-rose-900/40 hover:bg-rose-900/30 text-rose-300 transition text-sm font-medium"
+            className="flex items-center gap-3 p-3.5 rounded-xl bg-rose-500/[0.04] border border-rose-500/15 hover:bg-rose-500/10 hover:border-rose-500/30 text-rose-300 transition-all active:scale-[0.98] text-left"
           >
-            <ArrowUpRight className="w-4 h-4 text-rose-400" />
-            <span>Record Sale</span>
+            <div className="w-8 h-8 rounded-lg bg-rose-500/15 flex items-center justify-center shrink-0 text-rose-400">
+              <ArrowUpRight className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-white">Record Sale</div>
+              <div className="text-[11px] text-slate-400">Customer checkout (OUT)</div>
+            </div>
           </button>
+
           <button
             onClick={() => onOpenMovementModal('RETURN_IN')}
-            className="flex items-center gap-2.5 p-3 rounded-lg bg-teal-950/40 border border-teal-900/40 hover:bg-teal-900/30 text-teal-300 transition text-sm font-medium"
+            className="flex items-center gap-3 p-3.5 rounded-xl bg-teal-500/[0.04] border border-teal-500/15 hover:bg-teal-500/10 hover:border-teal-500/30 text-teal-300 transition-all active:scale-[0.98] text-left"
           >
-            <RotateCcw className="w-4 h-4 text-teal-400" />
-            <span>Customer Return</span>
+            <div className="w-8 h-8 rounded-lg bg-teal-500/15 flex items-center justify-center shrink-0 text-teal-400">
+              <RotateCcw className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-white">Customer Return</div>
+              <div className="text-[11px] text-slate-400">Re-enter to stock (IN)</div>
+            </div>
           </button>
+
           {isOwner && (
             <>
               <button
                 onClick={() => onOpenMovementModal('PURCHASE_IN')}
-                className="flex items-center gap-2.5 p-3 rounded-lg bg-emerald-950/40 border border-emerald-900/40 hover:bg-emerald-900/30 text-emerald-300 transition text-sm font-medium"
+                className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-500/[0.04] border border-emerald-500/15 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-emerald-300 transition-all active:scale-[0.98] text-left"
               >
-                <ArrowDownLeft className="w-4 h-4 text-emerald-400" />
-                <span>Receive Purchase</span>
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0 text-emerald-400">
+                  <ArrowDownLeft className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-white">Receive Purchase</div>
+                  <div className="text-[11px] text-slate-400">Supplier delivery (IN)</div>
+                </div>
               </button>
+
               <button
                 onClick={() => onOpenMovementModal('ADJUSTMENT_IN')}
-                className="flex items-center gap-2.5 p-3 rounded-lg bg-cyan-950/40 border border-cyan-900/40 hover:bg-cyan-900/30 text-cyan-300 transition text-sm font-medium"
+                className="flex items-center gap-3 p-3.5 rounded-xl bg-cyan-500/[0.04] border border-cyan-500/15 hover:bg-cyan-500/10 hover:border-cyan-500/30 text-cyan-300 transition-all active:scale-[0.98] text-left"
               >
-                <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
-                <span>Stock Adjustment</span>
+                <div className="w-8 h-8 rounded-lg bg-cyan-500/15 flex items-center justify-center shrink-0 text-cyan-400">
+                  <SlidersHorizontal className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-white">Stock Adjustment</div>
+                  <div className="text-[11px] text-slate-400">Audit correction (+/-)</div>
+                </div>
               </button>
             </>
           )}
         </div>
       </div>
 
-      {/* Two Column Layout: Low Stock Alerts & Recent Movements */}
+      {/* Two-Column Layout: Low Stock Watchlist & Recent Audit Ledger */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: Low Stock Attention List */}
-        <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+        {/* Left Column: Low Stock Critical Attention */}
+        <div className="bg-[#121316] border border-white/[0.06] rounded-2xl p-5 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <h3 className="font-semibold text-white text-sm">Critical Stock Attention</h3>
+            <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.06]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white text-sm">Low Stock Attention</h3>
+                  <p className="text-[11px] text-slate-400">Items needing urgent purchase</p>
+                </div>
               </div>
+
               <button
                 onClick={() => onNavigate('low-stock')}
-                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+                className="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 transition-colors"
               >
-                View all ({lowStockItems.length}) →
+                <span>View all ({lowStockItems.length})</span>
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
             {lowStockItems.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 text-sm flex flex-col items-center">
-                <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-2 opacity-80" />
-                <span>All items are comfortably stocked above threshold!</span>
+              <div className="py-14 text-center text-slate-400 text-xs flex flex-col items-center">
+                <CheckCircle2 className="w-8 h-8 text-emerald-400 mb-2 opacity-80" />
+                <span className="font-medium text-slate-300">All products are healthy!</span>
+                <span className="text-[11px] text-slate-500 mt-0.5">
+                  No products are currently under threshold.
+                </span>
               </div>
             ) : (
-              <div className="divide-y divide-slate-800/60 mt-2">
+              <div className="divide-y divide-white/[0.04] mt-2">
                 {lowStockItems.slice(0, 5).map((item) => (
-                  <div key={item._id} className="py-2.5 flex items-center justify-between">
+                  <div key={item._id} className="py-3 flex items-center justify-between">
                     <div>
                       <div className="font-medium text-slate-200 text-sm">{item.name}</div>
-                      <div className="text-xs text-slate-400 font-mono">
-                        {item.sku} • Thresh: {item.lowStockThreshold} {item.unit}
+                      <div className="text-[11px] text-slate-400 font-mono mt-0.5">
+                        {item.sku} • Threshold: {item.lowStockThreshold} {item.unit}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -266,7 +349,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                       {isOwner && (
                         <button
                           onClick={() => onOpenMovementModal('PURCHASE_IN', item._id)}
-                          className="px-2 py-1 rounded text-xs bg-emerald-950 border border-emerald-800 text-emerald-300 hover:bg-emerald-900 transition"
+                          className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
                         >
                           Restock
                         </button>
@@ -279,55 +362,64 @@ export const DashboardPage: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Right: Recent Movements Audit Trail */}
-        <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-5">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-indigo-400" />
-              <h3 className="font-semibold text-white text-sm">Latest Audit Ledger Entries</h3>
-            </div>
-            <button
-              onClick={() => onNavigate('movements')}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
-            >
-              Full Ledger →
-            </button>
-          </div>
-
-          {recentMovements.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 text-sm">
-              No stock movements recorded yet.
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-800/60 mt-2">
-              {recentMovements.map((mov) => (
-                <div key={mov._id} className="py-2.5 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-slate-200 text-sm truncate">
-                        {mov.product?.name || 'Product'}
-                      </span>
-                      {mov.reference && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono shrink-0">
-                          {mov.reference}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs text-slate-400 truncate">
-                      {mov.reason} • by {mov.actor?.name || 'User'}
-                    </div>
-                  </div>
-                  <div className="shrink-0">
-                    <MovementTypeBadge
-                      type={mov.type}
-                      quantity={mov.quantity}
-                      unit={mov.product?.unit}
-                    />
-                  </div>
+        {/* Right Column: Recent Movement Audit Trail */}
+        <div className="bg-[#121316] border border-white/[0.06] rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.06]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                  <Clock className="w-3.5 h-3.5" />
                 </div>
-              ))}
+                <div>
+                  <h3 className="font-semibold text-white text-sm">Recent Audit Ledger</h3>
+                  <p className="text-[11px] text-slate-400">Latest immutable movements</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => onNavigate('movements')}
+                className="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 transition-colors"
+              >
+                <span>Full Ledger</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
-          )}
+
+            {recentMovements.length === 0 ? (
+              <div className="py-14 text-center text-slate-400 text-xs">
+                No stock movements logged yet.
+              </div>
+            ) : (
+              <div className="divide-y divide-white/[0.04] mt-2">
+                {recentMovements.map((mov) => (
+                  <div key={mov._id} className="py-3 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-200 text-sm truncate">
+                          {mov.product?.name || 'Product'}
+                        </span>
+                        {mov.reference && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800/80 text-slate-400 font-mono shrink-0 border border-white/[0.05]">
+                            {mov.reference}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-slate-400 truncate mt-0.5">
+                        {mov.reason} • by {mov.actor?.name || 'User'}
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      <MovementTypeBadge
+                        type={mov.type}
+                        quantity={mov.quantity}
+                        unit={mov.product?.unit}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

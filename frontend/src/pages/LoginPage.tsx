@@ -37,7 +37,7 @@ export const LoginPage: React.FC = () => {
       <div className="max-w-md w-full space-y-6">
         {/* Logo and Brand */}
         <div className="text-center space-y-2">
-          <div className="inline-flex w-12 h-12 rounded-xl bg-indigo-600 items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-600/30">
+          <div className="inline-flex w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 via-blue-500 to-cyan-500 items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-500/25">
             IL
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Shop Inventory Ledger</h1>
@@ -68,7 +68,7 @@ export const LoginPage: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@shopledger.local"
-                  className="w-full bg-slate-800/80 border border-slate-700 pl-9 pr-3 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
+                  className="w-full bg-slate-800/80 border border-slate-700 pl-9 pr-3 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition"
                 />
               </div>
             </div>
@@ -83,7 +83,7 @@ export const LoginPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full bg-slate-800/80 border border-slate-700 pl-9 pr-3 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
+                  className="w-full bg-slate-800/80 border border-slate-700 pl-9 pr-3 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition"
                 />
               </div>
             </div>
@@ -91,7 +91,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white py-2.5 rounded-lg text-sm font-semibold transition shadow-md shadow-indigo-600/30"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 disabled:opacity-50 text-white py-2.5 rounded-lg text-sm font-semibold transition shadow-md shadow-blue-500/25 active:scale-95"
             >
               {loading ? (
                 <>
@@ -116,7 +116,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleQuickFill('owner')}
-                className="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-indigo-950/40 border border-indigo-900/50 hover:bg-indigo-900/30 text-indigo-300 text-xs font-medium transition"
+                className="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-blue-950/40 border border-blue-900/50 hover:bg-blue-900/30 text-blue-300 text-xs font-medium transition"
               >
                 <Shield className="w-3.5 h-3.5" />
                 <span>Fill Owner</span>

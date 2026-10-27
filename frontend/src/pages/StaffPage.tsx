@@ -91,7 +91,7 @@ export const StaffPage: React.FC = () => {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md shadow-indigo-600/30"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md shadow-blue-500/20"
         >
           <UserPlus className="w-4 h-4" />
           <span>Add Staff Account</span>
@@ -200,7 +200,7 @@ export const StaffPage: React.FC = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Ramesh Cashier"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
                 />
               </div>
 
@@ -212,7 +212,7 @@ export const StaffPage: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="e.g. cashier@shop.local"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
                 />
               </div>
 
@@ -225,7 +225,7 @@ export const StaffPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 6 characters"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
                 />
               </div>
 
@@ -234,7 +234,7 @@ export const StaffPage: React.FC = () => {
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as UserRole)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
                 >
                   <option value="STAFF">STAFF (Record sales & returns, view inventory)</option>
                   <option value="OWNER">OWNER (Full administrative access & reports)</option>
@@ -253,7 +253,7 @@ export const StaffPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md shadow-blue-500/20"
                 >
                   {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                   <span>Create User</span>

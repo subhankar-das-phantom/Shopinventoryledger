@@ -86,7 +86,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   if (loading && !product) {
     return (
       <div className="py-20 text-center text-slate-400">
-        <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-indigo-400" />
+        <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-blue-400" />
         <span>Loading product details and ledger...</span>
       </div>
     );
@@ -131,7 +131,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition"
               title="Verify ledger summation against balance projection"
             >
-              <ShieldCheck className={`w-3.5 h-3.5 text-indigo-400 ${parityChecking ? 'animate-spin' : ''}`} />
+              <ShieldCheck className={`w-3.5 h-3.5 text-blue-400 ${parityChecking ? 'animate-spin' : ''}`} />
               <span>Verify Ledger Parity</span>
             </button>
           )}
@@ -139,7 +139,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           {product.isActive && (
             <button
               onClick={() => onOpenMovementModal(undefined, product._id)}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-medium transition shadow-md shadow-indigo-600/30"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-medium transition shadow-md shadow-blue-500/20"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               <span>Record Stock</span>
