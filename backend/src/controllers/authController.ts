@@ -53,7 +53,8 @@ export const authController = {
             id: user._id,
             name: user.name,
             email: user.email,
-            role: user.role
+            role: user.role,
+            preferences: user.preferences || { theme: 'dark' }
           }
         }
       });
@@ -88,8 +89,46 @@ export const authController = {
             name: req.user.name,
             email: req.user.email,
             role: req.user.role,
+            preferences: req.user.preferences || { theme: 'dark' },
             createdAt: req.user.createdAt
           }
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async updatePreferences(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.user) {
+        throw new AppError('Not authenticated', 401);
+      }
+
+      const { theme } = req.body;
+      if (theme && !['dark', 'light', 'system'].includes(theme)) {
+        throw new AppError("Theme must be 'dark', 'light', or 'system'", 400);
+      }
+
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        throw new AppError('User not found', 404);
+      }
+
+      if (!user.preferences) {
+        user.preferences = { theme: 'dark' };
+      }
+      if (theme) {
+        user.preferences.theme = theme;
+      }
+
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Preferences updated successfully',
+        data: {
+          preferences: user.preferences
         }
       });
     } catch (error) {

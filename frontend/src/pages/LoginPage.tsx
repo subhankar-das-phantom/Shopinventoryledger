@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
-import { Shield, User, Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext.js';
+import { Shield, User, Lock, ArrowRight, AlertCircle, Loader2, Sun, Moon } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const { user, login } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
@@ -43,14 +45,31 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4">
+    <div className="relative min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 transition-colors">
+      {/* Top-Right Theme Toggle */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label="Toggle theme"
+          className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-slate-100 hover:border-slate-700 shadow-sm transition-colors"
+        >
+          {theme === 'dark' ? (
+            <Sun className="w-4 h-4 text-amber-400" />
+          ) : (
+            <Moon className="w-4 h-4 text-blue-500" />
+          )}
+        </button>
+      </div>
+
       <div className="max-w-md w-full space-y-6">
         {/* Logo and Brand */}
         <div className="text-center space-y-2">
           <div className="inline-flex w-12 h-12 rounded-lg bg-blue-600 border border-blue-500/30 items-center justify-center text-white font-bold text-xl shadow-sm">
             IL
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Shop Inventory Ledger</h1>
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Shop Inventory Ledger</h1>
           <p className="text-xs text-slate-400">
             Accounting-grade inventory ledger with strict concurrency controls
           </p>

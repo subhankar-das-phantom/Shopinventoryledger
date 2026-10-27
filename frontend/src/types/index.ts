@@ -1,11 +1,16 @@
 export type UserRole = 'OWNER' | 'STAFF';
 
+export interface UserPreferences {
+  theme?: 'dark' | 'light' | 'system';
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   role: UserRole;
   isActive?: boolean;
+  preferences?: UserPreferences;
   createdAt?: string;
 }
 

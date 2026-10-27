@@ -142,7 +142,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               <Package className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">
+              <h2 className="text-lg font-bold text-slate-100 tracking-tight">
                 {isEditing ? 'Edit Product Details' : 'Add New Product'}
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">

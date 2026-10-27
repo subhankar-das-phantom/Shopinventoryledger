@@ -258,7 +258,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
           <div>
-            <h2 className="text-lg font-semibold text-white">Record Stock Movement</h2>
+            <h2 className="text-lg font-semibold text-slate-100">Record Stock Movement</h2>
             <p className="text-xs text-slate-400">Ledger audit record with atomic concurrency protection</p>
           </div>
           <button
@@ -410,7 +410,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
 
                 {/* Floating Autocomplete Dropdown */}
                 {isDropdownOpen && (
-                  <div className="absolute left-0 right-0 z-50 mt-1.5 bg-[#121316] border border-slate-700/80 rounded-xl shadow-2xl max-h-56 overflow-y-auto divide-y divide-slate-800/80">
+                  <div className="absolute left-0 right-0 z-50 mt-1.5 bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl max-h-56 overflow-y-auto divide-y divide-slate-800/80">
                     {isSearching ? (
                       <div className="px-4 py-3 text-xs text-slate-400 flex items-center gap-2">
                         <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" />

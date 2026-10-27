@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.js';
+import { ThemeProvider } from './context/ThemeContext.js';
 import { Sidebar } from './components/Sidebar.js';
 import { Header } from './components/Header.js';
 import { LoginPage } from './pages/LoginPage.js';
@@ -90,7 +91,7 @@ const AppContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex flex-col items-center justify-center text-slate-400 gap-3">
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-400 gap-3">
         <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         <span className="text-sm font-medium">Loading Shop Inventory Ledger...</span>
       </div>
@@ -130,7 +131,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-slate-100 flex overflow-hidden">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex overflow-hidden">
       {/* Responsive Collapsible Sidebar */}
       <Sidebar
         onOpenMovementModal={() => handleOpenMovementModal()}
@@ -142,7 +143,7 @@ const AppContent: React.FC = () => {
       />
 
       {/* Main App Container */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-[#09090b]">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-slate-950">
         {/* Top Header */}
         <Header
           onToggleSidebar={handleToggleSidebar}
@@ -226,7 +227,9 @@ export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppContent />
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
   );

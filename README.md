@@ -1,7 +1,7 @@
 # Shop Inventory Ledger
 
 [![CI Pipeline](https://github.com/subhankar-das-phantom/Shopinventoryledger/actions/workflows/ci.yml/badge.svg)](https://github.com/subhankar-das-phantom/Shopinventoryledger/actions/workflows/ci.yml)
-[![Backend Tests](https://img.shields.io/badge/Backend%20Tests-24%20Passed-emerald.svg)](#automated-tests-and-ci-pipeline)
+[![Backend Tests](https://img.shields.io/badge/Backend%20Tests-25%20Passed-emerald.svg)](#automated-tests-and-ci-pipeline)
 [![Ledger Parity](https://img.shields.io/badge/Ledger%20Parity-100%25%20Verified-blue.svg)](#data-model-and-main-design-decisions)
 [![Concurrency Guard](https://img.shields.io/badge/Concurrency-Race--Free%20Guarded%20Atomic-purple.svg)](#data-model-and-main-design-decisions)
 [![Node.js](https://img.shields.io/badge/Node.js-v22.15.0-green.svg)](https://nodejs.org/)
@@ -126,9 +126,10 @@ npm test
 3. **Idempotency & Safe Network Retries** ([`backend/src/tests/idempotency.test.ts`](backend/src/tests/idempotency.test.ts))
    - Re-sending a request with an identical `Idempotency-Key` returns the cached previous result without duplicate movement creation or double-decrementing inventory.
    - Reusing an existing idempotency key with an altered payload aborts with `409 Conflict`.
-4. **Role-Based Access Control (RBAC)** ([`backend/src/tests/authorization.test.ts`](backend/src/tests/authorization.test.ts))
+4. **Role-Based Access Control (RBAC) & User Preferences** ([`backend/src/tests/authorization.test.ts`](backend/src/tests/authorization.test.ts))
    - Strict server-side route guards ensuring Staff accounts cannot create products, change prices, deactivate items, record purchases, adjust physical stock, create staff accounts, or export owner CSV reports.
    - Validates that unauthenticated requests are rejected with `401 Unauthorized`.
+   - Tests user preferences persistence: verifies `preferences.theme` (`dark` / `light` / `system`) updates via `PATCH /api/auth/preferences` and persists in the MongoDB `User` model.
 5. **Data Constraints, Valuation & CSV Formula Injection Protection** ([`backend/src/tests/productAndReports.test.ts`](backend/src/tests/productAndReports.test.ts))
    - Rejects duplicate SKUs with `409 Conflict`.
    - Protects CSV export against spreadsheet formula injection (`=`, `+`, `-`, `@`) in compliance with OWASP guidelines.
@@ -137,7 +138,7 @@ npm test
 ### GitHub Actions CI Workflow
 We have configured a comprehensive GitHub Actions CI pipeline in [`.github/workflows/ci.yml`](.github/workflows/ci.yml). On every push or pull request:
 - Spins up a real `mongo:7.0` container.
-- Installs dependencies and runs all 23 Vitest automated tests.
+- Installs dependencies and runs all 25 Vitest automated tests across 5 test suites.
 - Executes the database seed and ledger parity audit (`npm run verify`).
 - Typechecks and builds the production frontend bundle (`npm run build`).
 

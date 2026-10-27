@@ -194,7 +194,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white font-mono tracking-tight">
+            <div className="text-2xl font-bold text-slate-100 font-mono tracking-tight">
               {stats.totalProducts}
             </div>
             <p className="text-[11px] text-slate-500 mt-0.5">Active catalog SKUs</p>
@@ -275,7 +275,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
               <Package className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">All Products</h2>
+              <h2 className="text-base sm:text-lg font-bold text-slate-100 tracking-tight">All Products</h2>
               <p className="text-xs text-slate-400">
                 Showing {displayedProducts.length} of {stats.totalProducts} catalog items
               </p>

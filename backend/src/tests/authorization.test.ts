@@ -180,4 +180,29 @@ describe('Server-Side Role-Based Authorization Guards', () => {
     expect(returnRes.status).toBe(201);
     expect(returnRes.body.data.currentStock).toBe(13);
   });
+
+  it('User preferences (theme) can be updated and are persisted in the user model', async () => {
+    // 1. Initial state defaults to dark
+    const meRes1 = await request(app)
+      .get('/api/auth/me')
+      .set('Authorization', `Bearer ${ownerToken}`);
+    expect(meRes1.status).toBe(200);
+    expect(meRes1.body.data.user.preferences.theme).toBe('dark');
+
+    // 2. Update to light mode
+    const patchRes = await request(app)
+      .patch('/api/auth/preferences')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ theme: 'light' });
+
+    expect(patchRes.status).toBe(200);
+    expect(patchRes.body.data.preferences.theme).toBe('light');
+
+    // 3. Subsequent /me request reflects the updated theme in user model
+    const meRes2 = await request(app)
+      .get('/api/auth/me')
+      .set('Authorization', `Bearer ${ownerToken}`);
+    expect(meRes2.status).toBe(200);
+    expect(meRes2.body.data.user.preferences.theme).toBe('light');
+  });
 });

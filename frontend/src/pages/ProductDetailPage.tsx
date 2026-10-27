@@ -191,7 +191,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-bold text-white">{product.name}</h2>
+              <h2 className="text-xl font-bold text-slate-100">{product.name}</h2>
               {!product.isActive && (
                 <span className="px-2 py-0.5 rounded text-xs font-semibold bg-rose-950 text-rose-300 border border-rose-800">
                   Deactivated
@@ -218,7 +218,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               <div className="text-xs text-slate-400 uppercase tracking-wider font-medium">
                 Current Stock Balance
               </div>
-              <div className="text-3xl font-bold text-white font-mono mt-0.5">
+              <div className="text-3xl font-bold text-slate-100 font-mono mt-0.5">
                 {product.currentStock}{' '}
                 <span className="text-sm font-normal text-slate-400">{product.unit}</span>
               </div>
@@ -239,7 +239,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       <div className="bg-slate-800/40 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-white text-base">Movement Audit Trail</h3>
+            <h3 className="font-semibold text-slate-100 text-base">Movement Audit Trail</h3>
             <p className="text-xs text-slate-400">
               Showing bounded ledger history ({totalMovements} total recorded movements)
             </p>

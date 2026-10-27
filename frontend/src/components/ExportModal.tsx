@@ -181,11 +181,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       }}
     >
       <div
-        className="w-full max-w-2xl bg-[#0e0e11] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800/80 bg-[#121216]">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800 bg-slate-850/80">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
               <Download className="w-5 h-5" />
@@ -210,7 +210,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
           {/* Summary Banner if stats provided */}
           {stats && (
-            <div className="flex items-center justify-between px-4 py-3 bg-[#18181b]/70 border border-slate-800/80 rounded-xl text-xs">
+            <div className="flex items-center justify-between px-4 py-3 bg-slate-850/60 border border-slate-800 rounded-xl text-xs">
               <span className="text-slate-400 flex items-center gap-2">
                 <Layers className="w-4 h-4 text-slate-400" />
                 Target Dataset: <strong className="text-slate-200">{stats.label || entityName}</strong>
@@ -238,7 +238,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                     className={`relative w-full text-left p-4 rounded-xl border transition-all flex items-start gap-4 ${
                       isSelected
                         ? opt.activeBorder
-                        : 'border-slate-800 bg-[#121216]/60 hover:border-slate-700 hover:bg-[#16161c]'
+                        : 'border-slate-800 bg-slate-850/40 hover:border-slate-700 hover:bg-slate-850/70'
                     }`}
                   >
                     <div
@@ -289,7 +289,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                     className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
                       dateRange.preset === p.id
                         ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
-                        : 'bg-[#121216] text-slate-300 border-slate-800 hover:border-slate-700 hover:bg-slate-800/40'
+                        : 'bg-slate-850 text-slate-300 border-slate-800 hover:border-slate-700 hover:bg-slate-800/40'
                     }`}
                   >
                     {p.label}
@@ -309,7 +309,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                       onChange={(e) =>
                         setDateRange({ ...dateRange, startDate: e.target.value, preset: 'custom' })
                       }
-                      className="w-full bg-[#121216] border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                      className="w-full bg-slate-850 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -324,7 +324,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                       onChange={(e) =>
                         setDateRange({ ...dateRange, endDate: e.target.value, preset: 'custom' })
                       }
-                      className="w-full bg-[#121216] border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                      className="w-full bg-slate-850 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -334,7 +334,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800/80 bg-[#121216]">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-850/80">
           <span className="text-xs text-slate-400">
             Selected Format:{' '}
             <strong className="text-slate-200 uppercase font-mono">{selectedFormat}</strong>

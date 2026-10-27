@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
+import { useTheme } from '../context/ThemeContext.js';
 import {
   Menu,
   PanelLeftClose,
@@ -9,7 +10,9 @@ import {
   Plus,
   LogOut,
   Calendar,
-  ChevronRight
+  ChevronRight,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -29,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
   selectedProductName
 }) => {
   const { user, logout, isOwner } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
   const formattedDate = new Date().toLocaleDateString('en-IN', {
@@ -63,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
 
   return (
-    <header className="h-16 shrink-0 bg-[#0c0d10]/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6">
+    <header className="h-16 shrink-0 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800 sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 transition-colors">
       {/* Left: Sidebar Toggle & Breadcrumbs */}
       <div className="flex items-center gap-3 min-w-0">
         <button
@@ -118,7 +122,21 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="hidden sm:inline">Record Stock</span>
         </button>
 
-        <div className="h-5 w-px bg-white/[0.08] mx-1 hidden sm:block" />
+        {/* Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label="Toggle theme"
+          className="p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800/70 border border-slate-800 transition-colors"
+        >
+          {theme === 'dark' ? (
+            <Sun className="w-4 h-4 text-amber-400" />
+          ) : (
+            <Moon className="w-4 h-4 text-blue-500" />
+          )}
+        </button>
+
+        <div className="h-5 w-px bg-slate-800 mx-0.5 hidden sm:block" />
 
         {/* User Card */}
         <div className="flex items-center gap-2.5 pl-1">

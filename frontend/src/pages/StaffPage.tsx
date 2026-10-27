@@ -84,7 +84,7 @@ export const StaffPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Staff Account Management</h1>
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Staff Account Management</h1>
           <p className="text-sm text-slate-400 mt-0.5">
             Owner controls for cashier and employee credentials and role assignments
           </p>
@@ -180,7 +180,7 @@ export const StaffPage: React.FC = () => {
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
           <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold text-white mb-1">Create Staff Account</h2>
+            <h2 className="text-lg font-semibold text-slate-100 mb-1">Create Staff Account</h2>
             <p className="text-xs text-slate-400 mb-4">
               Add cashier or shop personnel with scoped role permissions
             </p>

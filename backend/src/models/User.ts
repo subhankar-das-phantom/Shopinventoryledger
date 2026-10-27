@@ -3,6 +3,10 @@ import bcrypt from 'bcryptjs';
 
 export type UserRole = 'OWNER' | 'STAFF';
 
+export interface IUserPreferences {
+  theme?: 'dark' | 'light' | 'system';
+}
+
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
@@ -10,6 +14,7 @@ export interface IUser extends Document {
   passwordHash: string;
   role: UserRole;
   isActive: boolean;
+  preferences?: IUserPreferences;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -47,6 +52,13 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: true,
       index: true
+    },
+    preferences: {
+      theme: {
+        type: String,
+        enum: ['dark', 'light', 'system'],
+        default: 'dark'
+      }
     }
   },
   {

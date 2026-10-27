@@ -51,7 +51,7 @@ const CustomVelocityTooltip = ({ active, payload, label }: any) => {
     const net = inflow - outflow;
 
     return (
-      <div className="bg-[#121316] border border-slate-700/80 p-3 rounded-lg shadow-xl text-xs space-y-2 min-w-[170px]">
+      <div className="bg-slate-900 border border-slate-700/80 p-3 rounded-lg shadow-xl text-xs space-y-2 min-w-[170px]">
         <div className="font-semibold text-slate-200 border-b border-slate-800 pb-1 flex items-center justify-between">
           <span>Date: {label}</span>
           <span className={`font-mono font-bold ${net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -85,7 +85,7 @@ const CustomDonutTooltip = ({ active, payload, isSalesMode }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-[#121316] border border-slate-700/80 p-3 rounded-lg shadow-xl text-xs space-y-1.5 min-w-[160px]">
+      <div className="bg-slate-900 border border-slate-700/80 p-3 rounded-lg shadow-xl text-xs space-y-1.5 min-w-[160px]">
         <div className="font-semibold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-1">
           <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: data.color }} />
           <span>{data.name}</span>
@@ -211,7 +211,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">
               Inventory Ledger Overview
             </h1>
             <span className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -283,7 +283,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-xl sm:text-2xl font-bold text-white font-mono tracking-tight">
+            <div className="text-xl sm:text-2xl font-bold text-slate-100 font-mono tracking-tight">
               ₹{(summary?.totalValuation ?? 0).toLocaleString('en-IN')}
             </div>
             <div className="mt-2 pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
@@ -302,7 +302,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-xl sm:text-2xl font-bold text-white font-mono tracking-tight">
+            <div className="text-xl sm:text-2xl font-bold text-slate-100 font-mono tracking-tight">
               {(summary?.totalUnits ?? 0).toLocaleString()} <span className="text-xs font-sans text-slate-500 font-normal">units</span>
             </div>
             <div className="mt-2 pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
@@ -375,7 +375,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                 <TrendingUp className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-white">Stock Movement Velocity</h2>
+                <h2 className="text-sm font-semibold text-slate-100">Stock Movement Velocity</h2>
                 <p className="text-xs text-slate-400">Daily physical inflow vs outflow units recorded in ledger</p>
               </div>
             </div>
@@ -397,7 +397,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                 <button
                   onClick={() => setTimeHorizon(14)}
                   className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
-                    timeHorizon === 14 ? 'bg-slate-800 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
+                    timeHorizon === 14 ? 'bg-slate-800 text-slate-100 font-semibold' : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   14 Days
@@ -405,7 +405,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                 <button
                   onClick={() => setTimeHorizon(30)}
                   className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
-                    timeHorizon === 30 ? 'bg-slate-800 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
+                    timeHorizon === 30 ? 'bg-slate-800 text-slate-100 font-semibold' : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   30 Days
@@ -468,7 +468,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                 <PieIcon className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-sm font-semibold text-white">Category Distribution</h2>
+                <h2 className="text-sm font-semibold text-slate-100">Category Distribution</h2>
                 <p className="text-xs text-slate-400 truncate">
                   {categoryMode === 'sales'
                     ? `Sales revenue by category (${timeHorizon}d)`
@@ -563,7 +563,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                   <Flame className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Fast-Moving Items</h3>
+                  <h3 className="text-sm font-semibold text-slate-100">Fast-Moving Items</h3>
                   <p className="text-[11px] text-slate-400">Highest sales turnover in {timeHorizon}d</p>
                 </div>
               </div>
@@ -582,14 +582,14 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                         #{idx + 1}
                       </span>
                       <div className="min-w-0">
-                        <div className="text-xs font-medium text-slate-200 truncate">{p.name}</div>
+                        <div className="text-xs font-medium text-slate-100 truncate">{p.name}</div>
                         <div className="text-[10px] text-slate-400 font-mono">
                           {p.sku} • {p.category}
                         </div>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="font-mono text-xs font-bold text-white">
+                      <div className="font-mono text-xs font-bold text-slate-100">
                         {p.unitsSold} {p.unit}
                       </div>
                       <div className="text-[10px] text-emerald-400 font-mono">
@@ -612,7 +612,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                   <Activity className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Quick Ledger Operations</h3>
+                  <h3 className="text-sm font-semibold text-slate-100">Quick Ledger Operations</h3>
                   <p className="text-[11px] text-slate-400">Atomic ledger state transitions with idempotency protection</p>
                 </div>
               </div>
@@ -624,7 +624,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                 className="p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 transition-colors text-left flex flex-col justify-between group active:scale-98"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-white group-hover:text-rose-300 transition-colors">
+                  <span className="text-xs font-semibold text-slate-100 group-hover:text-rose-400 transition-colors">
                     Customer Sale
                   </span>
                   <ArrowUpRight className="w-4 h-4 text-rose-400" />
@@ -642,7 +642,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                 className="p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 transition-colors text-left flex flex-col justify-between group active:scale-98"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-white group-hover:text-teal-300 transition-colors">
+                  <span className="text-xs font-semibold text-slate-100 group-hover:text-teal-400 transition-colors">
                     Customer Return
                   </span>
                   <RotateCcw className="w-4 h-4 text-teal-400" />
@@ -662,7 +662,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                     className="p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 transition-colors text-left flex flex-col justify-between group active:scale-98"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-white group-hover:text-emerald-300 transition-colors">
+                      <span className="text-xs font-semibold text-slate-100 group-hover:text-emerald-400 transition-colors">
                         Receive Purchase
                       </span>
                       <ArrowDownLeft className="w-4 h-4 text-emerald-400" />
@@ -680,7 +680,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                     className="p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 transition-colors text-left flex flex-col justify-between group active:scale-98"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-white group-hover:text-cyan-300 transition-colors">
+                      <span className="text-xs font-semibold text-slate-100 group-hover:text-cyan-400 transition-colors">
                         Stock Adjustment
                       </span>
                       <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
@@ -714,7 +714,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                   <AlertTriangle className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Low Stock Attention List</h3>
+                  <h3 className="text-sm font-semibold text-slate-100">Low Stock Attention List</h3>
                   <p className="text-[11px] text-slate-400">Items below configured minimum safety threshold</p>
                 </div>
               </div>
@@ -777,7 +777,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({
                   <Clock className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Recent Audit Ledger</h3>
+                  <h3 className="text-sm font-semibold text-slate-100">Recent Audit Ledger</h3>
                   <p className="text-[11px] text-slate-400">Immutable ledger transactions</p>
                 </div>
               </div>

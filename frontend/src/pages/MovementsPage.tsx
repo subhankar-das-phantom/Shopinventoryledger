@@ -143,7 +143,7 @@ export const MovementsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Stock Movement Audit Ledger</h1>
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Stock Movement Audit Ledger</h1>
           <p className="text-sm text-slate-400 mt-0.5">
             Immutable, bounded chronological audit trail of all inventory transactions
           </p>
@@ -212,7 +212,7 @@ export const MovementsPage: React.FC = () => {
 
             {/* Dropdown list */}
             {showProductDropdown && (productSearchText.trim().length > 0 || isSearchingProduct) && (
-              <div className="absolute left-0 right-0 z-50 mt-1 bg-[#121316] border border-slate-700/80 rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-800 text-xs">
+              <div className="absolute left-0 right-0 z-50 mt-1 bg-slate-900 border border-slate-700/80 rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-800 text-xs">
                 {isSearchingProduct ? (
                   <div className="p-3 text-slate-400 flex items-center gap-2">
                     <Loader2 className="w-3 h-3 animate-spin text-blue-400" />

@@ -77,6 +77,7 @@ export const seedDatabase = async (): Promise<void> => {
       email: DEMO_CREDENTIALS.owner.email,
       passwordHash: ownerHash,
       role: DEMO_CREDENTIALS.owner.role,
+      preferences: { theme: 'dark' },
       isActive: true
     }),
     User.create({
@@ -84,6 +85,7 @@ export const seedDatabase = async (): Promise<void> => {
       email: DEMO_CREDENTIALS.staff.email,
       passwordHash: staffHash,
       role: DEMO_CREDENTIALS.staff.role,
+      preferences: { theme: 'dark' },
       isActive: true
     }),
     // Extra convenience logins for demo/testing
@@ -92,6 +94,7 @@ export const seedDatabase = async (): Promise<void> => {
       email: DEMO_CREDENTIALS.ownerDemo.email,
       passwordHash: ownerDemoHash,
       role: DEMO_CREDENTIALS.ownerDemo.role,
+      preferences: { theme: 'dark' },
       isActive: true
     }),
     User.create({
@@ -99,6 +102,7 @@ export const seedDatabase = async (): Promise<void> => {
       email: DEMO_CREDENTIALS.staffDemo.email,
       passwordHash: staffDemoHash,
       role: DEMO_CREDENTIALS.staffDemo.role,
+      preferences: { theme: 'dark' },
       isActive: true
     })
   ]);

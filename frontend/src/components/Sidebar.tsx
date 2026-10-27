@@ -84,12 +84,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 bg-[#0e0f12] border-r border-white/[0.06] flex flex-col justify-between transition-all duration-300 ease-in-out lg:static lg:h-screen lg:shrink-0 ${
+        className={`fixed inset-y-0 left-0 z-50 bg-slate-900 border-r border-slate-800 flex flex-col justify-between transition-all duration-300 ease-in-out lg:static lg:h-screen lg:shrink-0 ${
           mobileOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'
         } ${isCollapsed ? 'lg:w-[72px]' : 'lg:w-64'}`}
       >
         {/* Top: Brand Header */}
-        <div className={`border-b border-white/[0.06] flex items-center ${isCollapsed ? 'p-3.5 justify-center' : 'p-4 justify-between'}`}>
+        <div className={`border-b border-slate-800 flex items-center ${isCollapsed ? 'p-3.5 justify-center' : 'p-4 justify-between'}`}>
           <Link
             to="/dashboard"
             onClick={onCloseMobile}
@@ -222,7 +222,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Bottom User Card */}
-        <div className="p-3 border-t border-white/[0.06] bg-[#0b0c0e]">
+        <div className="p-3 border-t border-slate-800 bg-slate-900/90">
           {isCollapsed ? (
             <div className="flex flex-col items-center gap-2">
               <div className="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-200">
@@ -237,7 +237,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
             </div>
           ) : (
-            <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-900/60 border border-white/[0.05]">
+            <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-850/80 border border-slate-800">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span className="font-semibold text-slate-200 text-xs truncate">
