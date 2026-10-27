@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.js';
 import { Sidebar } from './components/Sidebar.js';
 import { Header } from './components/Header.js';
@@ -17,8 +18,8 @@ import { Loader2 } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
-  const [currentTab, setCurrentTab] = useState<string>('dashboard');
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Desktop sidebar collapsed state
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
@@ -58,7 +59,7 @@ const AppContent: React.FC = () => {
     if (user) {
       fetchLowStockCount();
     }
-  }, [user, currentTab]);
+  }, [user, location.pathname]);
 
   // Global Ctrl+B shortcut to toggle sidebar collapse
   useEffect(() => {
@@ -88,7 +89,12 @@ const AppContent: React.FC = () => {
   }
 
   if (!user) {
-    return <LoginPage />;
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<Navigate to="/login" replace state={{ from: location }} />} />
+      </Routes>
+    );
   }
 
   const handleOpenMovementModal = (type?: MovementType, productId?: string) => {
@@ -100,11 +106,6 @@ const AppContent: React.FC = () => {
   const handleOpenProductModal = (product?: Product) => {
     setProductToEdit(product || null);
     setProductModalOpen(true);
-  };
-
-  const handleSelectProduct = (productId: string) => {
-    setSelectedProductId(productId);
-    setCurrentTab('product-detail');
   };
 
   const handleToggleSidebar = () => {
@@ -123,8 +124,6 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen bg-[#09090b] text-slate-100 flex overflow-hidden">
       {/* Responsive Collapsible Sidebar */}
       <Sidebar
-        currentTab={currentTab}
-        setCurrentTab={setCurrentTab}
         onOpenMovementModal={() => handleOpenMovementModal()}
         lowStockCount={lowStockCount}
         isCollapsed={isSidebarCollapsed}
@@ -136,7 +135,6 @@ const AppContent: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-[#09090b]">
         {/* Top Header */}
         <Header
-          currentTab={currentTab}
           onToggleSidebar={handleToggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
           onOpenMovementModal={() => handleOpenMovementModal()}
@@ -145,40 +143,50 @@ const AppContent: React.FC = () => {
         {/* Scrollable Viewport */}
         <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="max-w-7xl mx-auto space-y-6">
-            {currentTab === 'dashboard' && (
-              <DashboardPage
-                onNavigate={(tab) => setCurrentTab(tab)}
-                onOpenMovementModal={handleOpenMovementModal}
-                onOpenProductModal={() => handleOpenProductModal()}
+            <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <DashboardPage
+                    onNavigate={(tab) => navigate(tab.startsWith('/') ? tab : `/${tab}`)}
+                    onOpenMovementModal={handleOpenMovementModal}
+                    onOpenProductModal={() => handleOpenProductModal()}
+                  />
+                }
               />
-            )}
-
-            {currentTab === 'products' && (
-              <ProductsPage
-                onSelectProduct={handleSelectProduct}
-                onOpenProductModal={handleOpenProductModal}
-                onOpenMovementModal={handleOpenMovementModal}
+              <Route
+                path="/products"
+                element={
+                  <ProductsPage
+                    onSelectProduct={(productId) => navigate(`/products/${productId}`)}
+                    onOpenProductModal={handleOpenProductModal}
+                    onOpenMovementModal={handleOpenMovementModal}
+                  />
+                }
               />
-            )}
-
-            {currentTab === 'product-detail' && selectedProductId && (
-              <ProductDetailPage
-                productId={selectedProductId}
-                onBack={() => setCurrentTab('products')}
-                onOpenMovementModal={handleOpenMovementModal}
+              <Route
+                path="/products/:id"
+                element={
+                  <ProductDetailPage
+                    onBack={() => navigate('/products')}
+                    onOpenMovementModal={handleOpenMovementModal}
+                  />
+                }
               />
-            )}
-
-            {currentTab === 'movements' && <MovementsPage />}
-
-            {currentTab === 'low-stock' && (
-              <LowStockPage
-                onOpenMovementModal={handleOpenMovementModal}
-                onSelectProduct={handleSelectProduct}
+              <Route path="/movements" element={<MovementsPage />} />
+              <Route
+                path="/low-stock"
+                element={
+                  <LowStockPage
+                    onOpenMovementModal={handleOpenMovementModal}
+                    onSelectProduct={(productId) => navigate(`/products/${productId}`)}
+                  />
+                }
               />
-            )}
-
-            {currentTab === 'staff' && <StaffPage />}
+              <Route path="/staff" element={<StaffPage />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
           </div>
         </main>
       </div>
@@ -208,9 +216,11 @@ const AppContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </BrowserRouter>
   );
 };
 

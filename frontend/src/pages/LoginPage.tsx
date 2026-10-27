@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 import { Shield, User, Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { login } = useAuth();
+  const { user, login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,7 +22,10 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
 
     const result = await login(email.trim(), password);
-    if (!result.success) {
+    if (result.success) {
+      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    } else {
       setError(result.error || 'Login failed. Please check your credentials.');
       setLoading(false);
     }

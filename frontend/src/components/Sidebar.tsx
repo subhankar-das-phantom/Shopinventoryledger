@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 import { RoleBadge } from './Badge.js';
 import {
@@ -13,8 +14,8 @@ import {
 } from 'lucide-react';
 
 interface SidebarProps {
-  currentTab: string;
-  setCurrentTab: (tab: string) => void;
+  currentTab?: string;
+  setCurrentTab?: (tab: string) => void;
   onOpenMovementModal: () => void;
   lowStockCount?: number;
   isCollapsed: boolean;
@@ -23,8 +24,6 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
-  currentTab,
-  setCurrentTab,
   onOpenMovementModal,
   lowStockCount = 0,
   isCollapsed,
@@ -32,15 +31,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   mobileOpen
 }) => {
   const { user, logout, isOwner } = useAuth();
+  const location = useLocation();
 
   const navSections = [
     {
       title: 'INVENTORY & CATALOG',
       items: [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'products', label: 'Products', icon: Package },
+        { id: 'dashboard', path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'products', path: '/products', label: 'Products', icon: Package },
         {
           id: 'low-stock',
+          path: '/low-stock',
           label: 'Low Stock',
           icon: AlertTriangle,
           badge: lowStockCount > 0 ? String(lowStockCount) : undefined
@@ -49,21 +50,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       title: 'AUDIT & HISTORY',
-      items: [{ id: 'movements', label: 'Movement Ledger', icon: History }]
+      items: [{ id: 'movements', path: '/movements', label: 'Movement Ledger', icon: History }]
     },
     ...(isOwner
       ? [
           {
             title: 'ADMINISTRATION',
-            items: [{ id: 'staff', label: 'Staff Accounts', icon: Users }]
+            items: [{ id: 'staff', path: '/staff', label: 'Staff Accounts', icon: Users }]
           }
         ]
       : [])
   ];
 
-  const handleSelectTab = (id: string) => {
-    setCurrentTab(id);
-    onCloseMobile();
+  const isItemActive = (path: string) => {
+    if (path === '/dashboard') {
+      return location.pathname === '/' || location.pathname === '/dashboard';
+    }
+    return location.pathname.startsWith(path);
   };
 
   return (
@@ -84,9 +87,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {/* Top: Brand Header */}
         <div className={`border-b border-white/[0.06] flex items-center ${isCollapsed ? 'p-3.5 justify-center' : 'p-4 justify-between'}`}>
-          <div
+          <Link
+            to="/dashboard"
+            onClick={onCloseMobile}
             className="flex items-center gap-3 cursor-pointer group select-none min-w-0"
-            onClick={() => handleSelectTab('dashboard')}
           >
             {/* Logo Icon with subtle gradient glow */}
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-blue-500/25 shrink-0 group-hover:scale-105 transition-transform">
@@ -104,7 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               </div>
             )}
-          </div>
+          </Link>
 
           {/* Mobile close button */}
           <button
@@ -144,11 +148,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
               {section.items.map((item) => {
                 const Icon = item.icon;
-                const isActive = currentTab === item.id;
+                const isActive = isItemActive(item.path);
                 return (
-                  <button
+                  <Link
                     key={item.id}
-                    onClick={() => handleSelectTab(item.id)}
+                    to={item.path}
+                    onClick={onCloseMobile}
                     title={isCollapsed ? item.label : undefined}
                     className={`group relative w-full flex items-center rounded-xl transition-all ${
                       isCollapsed
@@ -190,7 +195,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {isCollapsed && item.badge && (
                       <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-[#0e0f12]" />
                     )}
-                  </button>
+                  </Link>
                 );
               })}
             </div>

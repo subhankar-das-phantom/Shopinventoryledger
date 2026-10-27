@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 import {
   Menu,
@@ -11,7 +12,7 @@ import {
 } from 'lucide-react';
 
 interface HeaderProps {
-  currentTab: string;
+  currentTab?: string;
   onToggleSidebar: () => void;
   isSidebarCollapsed: boolean;
   onOpenMovementModal: () => void;
@@ -19,13 +20,13 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  currentTab,
   onToggleSidebar,
   isSidebarCollapsed,
   onOpenMovementModal,
   selectedProductName
 }) => {
   const { user, logout } = useAuth();
+  const location = useLocation();
 
   const formattedDate = new Date().toLocaleDateString('en-IN', {
     weekday: 'short',
@@ -34,22 +35,26 @@ export const Header: React.FC<HeaderProps> = ({
   });
 
   const getBreadcrumbTitle = () => {
-    switch (currentTab) {
-      case 'dashboard':
-        return 'Overview';
-      case 'products':
-        return 'Product Catalog';
-      case 'product-detail':
-        return selectedProductName ? selectedProductName : 'Product Detail';
-      case 'movements':
-        return 'Movement Ledger';
-      case 'low-stock':
-        return 'Low Stock Attention';
-      case 'staff':
-        return 'Staff Management';
-      default:
-        return 'Inventory';
+    const path = location.pathname;
+    if (path === '/' || path === '/dashboard') {
+      return 'Overview';
     }
+    if (path.startsWith('/products/')) {
+      return selectedProductName ? selectedProductName : 'Product Detail & History';
+    }
+    if (path === '/products') {
+      return 'Product Catalog';
+    }
+    if (path === '/movements') {
+      return 'Movement Ledger';
+    }
+    if (path === '/low-stock') {
+      return 'Low Stock Attention';
+    }
+    if (path === '/staff') {
+      return 'Staff Management';
+    }
+    return 'Inventory';
   };
 
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
@@ -72,7 +77,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         <div className="flex items-center gap-2 text-xs text-slate-400 font-medium overflow-hidden whitespace-nowrap">
-          <span className="text-slate-500 hover:text-slate-300 cursor-default">Shop</span>
+          <Link to="/dashboard" className="text-slate-500 hover:text-slate-300 transition-colors">Shop</Link>
           <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
           <span className="text-slate-200 font-semibold truncate text-sm">
             {getBreadcrumbTitle()}

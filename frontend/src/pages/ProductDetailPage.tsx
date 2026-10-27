@@ -13,18 +13,23 @@ import {
   Hash,
   AlertCircle
 } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
 
 interface ProductDetailPageProps {
-  productId: string;
-  onBack: () => void;
+  productId?: string;
+  onBack?: () => void;
   onOpenMovementModal: (type?: any, productId?: string) => void;
 }
 
 export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
-  productId,
-  onBack,
+  productId: propProductId,
+  onBack: propOnBack,
   onOpenMovementModal
 }) => {
+  const { id: paramId } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const productId = propProductId || paramId || '';
+  const onBack = propOnBack || (() => navigate('/products'));
   const { isOwner } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [movements, setMovements] = useState<StockMovement[]>([]);
