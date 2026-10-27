@@ -7,10 +7,10 @@ const startServer = async () => {
     await connectDB();
     const app = createApp();
 
-    const server = app.listen(ENV.PORT, () => {
+    const server = app.listen(ENV.PORT, '0.0.0.0', () => {
       console.log(`===============================================`);
       console.log(`  Shop Inventory Ledger Backend API`);
-      console.log(`  Running on: http://localhost:${ENV.PORT}`);
+      console.log(`  Running on: http://0.0.0.0:${ENV.PORT}`);
       console.log(`  Environment: ${ENV.NODE_ENV}`);
       console.log(`===============================================`);
     });
