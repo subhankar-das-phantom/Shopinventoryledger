@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ master, main ]
   workflow_dispatch:
+    inputs:
+      reseed:
+        description: 'Force wipe & re-seed demo data in target database'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   test:
@@ -99,7 +105,12 @@ jobs:
         working-directory: backend
         run: npm ci
 
-      - name: Seed Demo Ledger in Development Environment
+      # SAFETY GUARD:
+      # Only seed if running against the ephemeral local CI container (secrets.MONGODB_URI is empty)
+      # OR if explicitly requested via manual dispatch (inputs.reseed == true).
+      # This prevents CI from wiping or duplicating data in your live MongoDB Atlas cluster!
+      - name: Seed Demo Ledger (Ephemeral CI Container Only)
+        if: ${{ secrets.MONGODB_URI == '' || inputs.reseed == true }}
         working-directory: backend
         run: |
           export JWT_SECRET="${{ secrets.JWT_SECRET }}"
@@ -112,7 +123,7 @@ jobs:
           PORT: ${{ vars.PORT != '' && vars.PORT || '5000' }}
           MONGODB_URI: ${{ secrets.MONGODB_URI != '' && secrets.MONGODB_URI || 'mongodb://localhost:27017/shop_inventory_ledger' }}
 
-      - name: Run Authoritative Parity Audit (Double-Entry Invariant Check)
+      - name: Run Authoritative Parity Audit (Read-Only Double-Entry Invariant Check)
         working-directory: backend
         run: |
           export JWT_SECRET="${{ secrets.JWT_SECRET }}"
