@@ -1,7 +1,7 @@
 # Shop Inventory Ledger
 
 [![CI Pipeline](https://github.com/subhankar-das-phantom/Shopinventoryledger/actions/workflows/ci.yml/badge.svg)](https://github.com/subhankar-das-phantom/Shopinventoryledger/actions/workflows/ci.yml)
-[![Backend Tests](https://img.shields.io/badge/Backend%20Tests-23%20Passed-emerald.svg)](#automated-tests-and-ci-pipeline)
+[![Backend Tests](https://img.shields.io/badge/Backend%20Tests-24%20Passed-emerald.svg)](#automated-tests-and-ci-pipeline)
 [![Ledger Parity](https://img.shields.io/badge/Ledger%20Parity-100%25%20Verified-blue.svg)](#data-model-and-main-design-decisions)
 [![Concurrency Guard](https://img.shields.io/badge/Concurrency-Race--Free%20Guarded%20Atomic-purple.svg)](#data-model-and-main-design-decisions)
 [![Node.js](https://img.shields.io/badge/Node.js-v22.15.0-green.svg)](https://nodejs.org/)
@@ -34,7 +34,7 @@ The application includes pre-seeded demo accounts. The login screen also feature
 ### 2. Clone and Install Dependencies
 ```bash
 # Clone the repository
-git clone https://github.com/subhankarmusic/Shopinventoryledger.git
+git clone https://github.com/subhankar-das-phantom/Shopinventoryledger.git
 cd Shopinventoryledger
 
 # Install backend dependencies
@@ -105,7 +105,7 @@ npm run dev
 
 ## 🧪 Automated Tests and CI Pipeline
 
-### Backend Test Suite (23 Automated Tests across 5 Critical Suites)
+### Backend Test Suite (24 Automated Tests across 5 Critical Suites)
 To run all tests against an isolated in-memory MongoDB environment:
 ```bash
 cd backend
@@ -226,11 +226,12 @@ A documented [`.env.example`](.env.example) is provided at the repository root a
 - **Race-Free Concurrency Guard**: Guarded conditional atomic decrements preventing overselling under high concurrency.
 - **Idempotent Movement Recording**: HTTP `Idempotency-Key` tracking and replay caching for safe mobile/network retries.
 - **Role-Based Access Control (RBAC)**: Complete server-side role separation between `OWNER` (full admin) and `STAFF` (pos/sales only).
-- **Automated Test Coverage**: 23 comprehensive tests covering race conditions, domain invariants, idempotency, RBAC, and data validation.
+- **Automated Test Coverage**: 24 comprehensive tests covering race conditions, domain invariants, idempotency, RBAC, multi-format export, and data validation.
 - **Continuous Integration (CI)**: GitHub Actions workflow testing and building the full stack with live MongoDB service.
 - **Audit Parity Verification**: On-demand CLI (`npm run verify`) and API verification comparing ledger sums against projected balances.
 - **High-Density SaaS Frontend**: Premium obsidian UI matching Bharat Enterprise aesthetic with KPI cards, segmented stock filters, dynamic category pill selector, instant debounced search, and zero-page-reload reactive updates.
-- **Formula-Injection Safe CSV Export**: Owner export compliant with RFC 4180 that neutralizes spreadsheet formula execution vulnerabilities (`=`, `+`, `-`, `@`).
+- **Multi-Format Reusable Export Infrastructure**: Professional export engine supporting **Excel (.xlsx)** with executive summary worksheets and auto-filters, **PDF (.pdf)** landscape ledger reports with pagination, **RFC-4180 CSV** with OWASP formula injection protection, and **JSON (.json)** with date range presets (`Today`, `Yesterday`, `Last 7 Days`, `This Month`, `Last Month`, `Last 30 Days`, `This Year`, `All Time`).
+- **12-Month Year-Round Historical Seed**: Realistic dataset of 88 chronological movements across 12 products demonstrating true velocity curves, turnover rankings, and inventory health states.
 
 ### ⏳ What Isn't Finished
 - **Batch / Expiry Date (FIFO / FEFO) Allocation**: Tracking batch lots and expiring dates for perishable goods.
