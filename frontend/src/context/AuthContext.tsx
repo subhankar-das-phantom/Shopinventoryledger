@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { api, extractErrorMessage } from '../api/client.js';
+import React, { createContext, useContext, useState } from 'react';
+import useSWR, { mutate } from 'swr';
+import { api, fetcher, extractErrorMessage } from '../api/client.js';
 import { User } from '../types/index.js';
 
 interface AuthContextType {
@@ -10,43 +11,32 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isOwner: boolean;
   isStaff: boolean;
+  mutateUser: () => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
 
-  // Restore authenticated session on mount
-  useEffect(() => {
-    const fetchMe = async () => {
-      const storedToken = localStorage.getItem('token');
-      if (!storedToken) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const res = await api.get('/auth/me');
-        if (res.data.success && res.data.data.user) {
-          setUser(res.data.data.user);
-        } else {
+  // Use SWR to cache and automatically revalidate the authenticated session
+  const { data, isLoading, mutate: mutateMe } = useSWR<{ success: boolean; data: { user: User } }>(
+    token ? '/auth/me' : null,
+    fetcher,
+    {
+      revalidateOnFocus: true,
+      dedupingInterval: 5000,
+      shouldRetryOnError: false,
+      onError: (err: any) => {
+        if (err.response?.status === 401) {
           localStorage.removeItem('token');
           setToken(null);
         }
-      } catch {
-        localStorage.removeItem('token');
-        setToken(null);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
       }
-    };
+    }
+  );
 
-    fetchMe();
-  }, []);
+  const user = data?.success ? data.data.user : null;
 
   const login = async (email: string, password: string) => {
     try {
@@ -55,7 +45,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { token: newToken, user: newUser } = res.data.data;
         localStorage.setItem('token', newToken);
         setToken(newToken);
-        setUser(newUser);
+        // Pre-seed SWR cache with user object without waiting for another network request
+        await mutateMe({ success: true, data: { user: newUser } }, false);
         return { success: true };
       }
       return { success: false, error: 'Login failed' };
@@ -72,7 +63,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       localStorage.removeItem('token');
       setToken(null);
-      setUser(null);
+      await mutateMe(undefined, false);
+      // Invalidate all cached SWR keys across the application
+      mutate(() => true, undefined, { revalidate: false });
     }
   };
 
@@ -84,11 +77,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         token,
-        isLoading,
+        isLoading: token ? isLoading : false,
         login,
         logout,
         isOwner,
-        isStaff
+        isStaff,
+        mutateUser: mutateMe
       }}
     >
       {children}

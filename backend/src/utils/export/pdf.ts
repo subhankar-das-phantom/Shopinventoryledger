@@ -35,9 +35,9 @@ export const buildPDF = <T = any>(
       });
 
       const chunks: Buffer[] = [];
-      doc.on('data', (chunk) => chunks.push(chunk));
+      doc.on('data', (chunk: any) => chunks.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', (err) => reject(err));
+      doc.on('error', (err: any) => reject(err));
 
       renderPdfContent(doc, definition);
     } catch (err) {
@@ -63,7 +63,7 @@ export const streamPDF = <T = any>(
   renderPdfContent(doc, definition);
 };
 
-function renderPdfContent<T>(doc: PDFKit.PDFDocument, definition: ExportDefinition<T>): void {
+function renderPdfContent<T>(doc: any, definition: ExportDefinition<T>): void {
   const pageLeft = doc.page.margins.left;
   const contentWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
@@ -103,7 +103,7 @@ function renderPdfContent<T>(doc: PDFKit.PDFDocument, definition: ExportDefiniti
     y: number,
     width: number,
     height: number,
-    options: PDFKit.Mixins.TextOptions = {}
+    options: any = {}
   ) => {
     doc.rect(x, y, width, height).stroke('#e2e8f0');
     doc.text(sanitizeForPdfFont(text), x + 4, y + 4.5, {

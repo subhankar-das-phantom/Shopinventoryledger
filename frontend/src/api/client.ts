@@ -38,6 +38,12 @@ export const createIdempotencyKey = (prefix: string = 'req'): string => {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 };
 
+// SWR Fetcher with configured Axios instance
+export const fetcher = async <T = any>(url: string): Promise<T> => {
+  const res = await api.get(url);
+  return res.data;
+};
+
 // Reusable file download helper for Excel/CSV/JSON exports
 export const downloadFile = async (
   endpoint: string,

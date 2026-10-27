@@ -398,11 +398,11 @@ export const seedDatabase = async (): Promise<void> => {
     const parity = await stockMovementService.verifyStockParity(prod._id);
     const status = parity.parity ? '✅ PARITY OK' : '❌ MISMATCH';
 
-    // Refresh product to show final stock
+    // Check stock health label against threshold
     const freshProd = await Product.findById(prod._id).lean();
     let healthLabel = 'OPTIMAL';
-    if (freshProd && freshProd.currentStock === 0) healthLabel = '🚨 OUT OF STOCK';
-    else if (freshProd && freshProd.currentStock <= freshProd.lowStockThreshold) healthLabel = '⚠️ LOW STOCK';
+    if (parity.projectedStock === 0) healthLabel = '🚨 OUT OF STOCK';
+    else if (freshProd && parity.projectedStock <= freshProd.lowStockThreshold) healthLabel = '⚠️ LOW STOCK';
 
     console.log(
       `Product [${sku.padEnd(15)}] ${prod.name.padEnd(35)}: Stock = ${String(parity.projectedStock).padStart(3)} ${prod.unit.padEnd(6)} | Ledger = ${String(parity.derivedStock).padStart(3)} | ${status} | ${healthLabel}`

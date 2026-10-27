@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext.js';
 import { api, extractErrorMessage, createIdempotencyKey } from '../api/client.js';
 import { Product, MovementType } from '../types/index.js';
 import { useDebounce } from '../hooks/index.js';
+import { invalidateInventoryCache } from '../hooks/useData.js';
 import {
   X,
   AlertCircle,
@@ -234,6 +235,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
 
       if (res.data.success) {
         setSuccessMessage(`Movement recorded! New stock: ${res.data.data.currentStock} ${selectedProduct?.unit || 'units'}`);
+        invalidateInventoryCache();
         window.dispatchEvent(new CustomEvent('catalog-updated'));
         // Remain permanently locked while displaying success message
         setTimeout(() => {

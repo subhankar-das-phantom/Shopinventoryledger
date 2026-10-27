@@ -148,9 +148,9 @@ export const buildWorkbook = async <T = any>(
   });
 
   // Cell borders
-  dataSheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+  dataSheet.eachRow({ includeEmpty: false }, (row: any, rowNumber: number) => {
     if (rowNumber < columnHeaderRowNum) return;
-    row.eachCell({ includeEmpty: false }, (cell) => {
+    row.eachCell({ includeEmpty: false }, (cell: any) => {
       cell.border = {
         top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
         left: { style: 'thin', color: { argb: 'FFE2E8F0' } },

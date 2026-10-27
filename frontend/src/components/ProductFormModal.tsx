@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api, extractErrorMessage } from '../api/client.js';
 import { Product } from '../types/index.js';
+import { invalidateInventoryCache } from '../hooks/useData.js';
 import {
   X,
   AlertCircle,
@@ -120,6 +121,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         });
       }
 
+      invalidateInventoryCache();
       window.dispatchEvent(new CustomEvent('catalog-updated'));
       onSuccess();
       onClose();
