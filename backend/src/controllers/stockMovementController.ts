@@ -771,6 +771,41 @@ export const stockMovementController = {
         revenue: Math.round(s.unitsSold * s.price)
       }));
 
+      // 4. Sales performance by category over the selected period
+      const categorySalesAgg = await StockMovement.aggregate([
+        {
+          $match: {
+            type: 'SALE_OUT',
+            movementDate: { $gte: startDate }
+          }
+        },
+        {
+          $lookup: {
+            from: 'products',
+            localField: 'productId',
+            foreignField: '_id',
+            as: 'product'
+          }
+        },
+        { $unwind: '$product' },
+        {
+          $group: {
+            _id: { $ifNull: ['$product.category', 'General'] },
+            unitsSold: { $sum: '$quantity' },
+            revenue: { $sum: { $multiply: ['$quantity', { $ifNull: ['$product.price', 0] }] } }
+          }
+        },
+        { $sort: { revenue: -1 } }
+      ]);
+
+      const totalSalesRevenue = categorySalesAgg.reduce((acc, c) => acc + (c.revenue || 0), 0);
+      const categorySales = categorySalesAgg.map((c) => ({
+        name: c._id,
+        unitsSold: c.unitsSold,
+        totalValue: Math.round(c.revenue),
+        percentage: totalSalesRevenue > 0 ? Number(((c.revenue / totalSalesRevenue) * 100).toFixed(1)) : 0
+      }));
+
       res.status(200).json({
         success: true,
         data: {
@@ -787,6 +822,7 @@ export const stockMovementController = {
           },
           velocity,
           categoryDistribution,
+          categorySales,
           topProducts
         }
       });

@@ -85,8 +85,9 @@ export interface VelocityPoint {
 
 export interface CategoryDistribution {
   name: string;
-  skuCount: number;
-  stockUnits: number;
+  skuCount?: number;
+  stockUnits?: number;
+  unitsSold?: number;
   totalValue: number;
   percentage: number;
 }
@@ -119,5 +120,6 @@ export interface AnalyticsData {
   summary: AnalyticsSummary;
   velocity: VelocityPoint[];
   categoryDistribution: CategoryDistribution[];
+  categorySales?: CategoryDistribution[];
   topProducts: TopProductItem[];
 }

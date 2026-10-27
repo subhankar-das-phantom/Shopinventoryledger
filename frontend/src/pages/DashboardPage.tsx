@@ -80,7 +80,7 @@ const CustomVelocityTooltip = ({ active, payload, label }: any) => {
 };
 
 // Clean custom tooltip for Donut Chart
-const CustomDonutTooltip = ({ active, payload }: any) => {
+const CustomDonutTooltip = ({ active, payload, isSalesMode }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -90,17 +90,25 @@ const CustomDonutTooltip = ({ active, payload }: any) => {
           <span>{data.name}</span>
         </div>
         <div className="flex items-center justify-between text-slate-400">
-          <span>Asset Value:</span>
+          <span>{isSalesMode ? 'Sales Revenue:' : 'Asset Value:'}</span>
           <span className="font-mono font-bold text-slate-100">
             ₹{data.totalValue?.toLocaleString('en-IN')}
           </span>
         </div>
+        {isSalesMode && data.unitsSold !== undefined && (
+          <div className="flex items-center justify-between text-slate-400">
+            <span>Units Sold:</span>
+            <span className="font-mono text-slate-200">{data.unitsSold}</span>
+          </div>
+        )}
+        {!isSalesMode && data.stockUnits !== undefined && (
+          <div className="flex items-center justify-between text-slate-400">
+            <span>Physical Stock:</span>
+            <span className="font-mono text-slate-200">{data.stockUnits} units</span>
+          </div>
+        )}
         <div className="flex items-center justify-between text-slate-400">
-          <span>Physical Stock:</span>
-          <span className="font-mono text-slate-200">{data.stockUnits} units</span>
-        </div>
-        <div className="flex items-center justify-between text-slate-400">
-          <span>Catalog Share:</span>
+          <span>{isSalesMode ? 'Sales Share:' : 'Catalog Share:'}</span>
           <span className="font-mono text-blue-400 font-semibold">{data.percentage}%</span>
         </div>
       </div>
@@ -179,14 +187,21 @@ export const DashboardPage: React.FC<DashboardProps> = ({
     }
   };
 
-  // Prepare Donut Chart Data with assigned colors
+  // Metric mode: Inventory Valuation vs Sales Revenue
+  const [categoryMode, setCategoryMode] = useState<'valuation' | 'sales'>('valuation');
+
+  // Prepare Donut Chart Data with assigned colors based on selected mode
   const donutData = useMemo(() => {
-    if (!analytics?.categoryDistribution?.length) return [];
-    return analytics.categoryDistribution.slice(0, 6).map((cat, idx) => ({
+    const list = categoryMode === 'sales'
+      ? analytics?.categorySales
+      : analytics?.categoryDistribution;
+
+    if (!list?.length) return [];
+    return list.slice(0, 6).map((cat, idx) => ({
       ...cat,
       color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length]
     }));
-  }, [analytics]);
+  }, [analytics, categoryMode]);
 
   const summary = analytics?.summary;
   const velocity = analytics?.velocity || [];
@@ -449,26 +464,60 @@ export const DashboardPage: React.FC<DashboardProps> = ({
 
         {/* Secondary Chart (1 col): Category Valuation & Share Donut */}
         <div className="app-card p-5 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+          <div className="flex items-center justify-between mb-3 gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0">
                 <PieIcon className="w-4 h-4" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h2 className="text-sm font-semibold text-white">Category Distribution</h2>
-                <p className="text-xs text-slate-400">Inventory valuation by product category</p>
+                <p className="text-xs text-slate-400 truncate">
+                  {categoryMode === 'sales'
+                    ? `Sales revenue by category (${timeHorizon}d)`
+                    : 'Inventory valuation by category'}
+                </p>
               </div>
+            </div>
+
+            {/* Mode Segmented Control */}
+            <div className="inline-flex items-center p-0.5 bg-slate-950 border border-slate-800 rounded-md text-xs shrink-0">
+              <button
+                type="button"
+                onClick={() => setCategoryMode('valuation')}
+                className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
+                  categoryMode === 'valuation'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                title="View inventory valuation by category"
+              >
+                Stock Value
+              </button>
+              <button
+                type="button"
+                onClick={() => setCategoryMode('sales')}
+                className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
+                  categoryMode === 'sales'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                title="View sales revenue generated by category"
+              >
+                Sales Revenue
+              </button>
             </div>
           </div>
 
           {/* Donut Chart */}
           <div className="h-[160px] w-full flex items-center justify-center">
             {donutData.length === 0 ? (
-              <div className="text-xs text-slate-500 text-center">No active categories found</div>
+              <div className="text-xs text-slate-500 text-center">
+                {categoryMode === 'sales' ? 'No sales recorded in this period' : 'No active categories found'}
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Tooltip content={<CustomDonutTooltip />} />
+                  <Tooltip content={<CustomDonutTooltip isSalesMode={categoryMode === 'sales'} />} />
                   <Pie
                     data={donutData}
                     cx="50%"
