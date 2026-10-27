@@ -10,6 +10,7 @@ import {
   Users,
   LogOut,
   PlusCircle,
+  Plus,
   X
 } from 'lucide-react';
 
@@ -17,6 +18,7 @@ interface SidebarProps {
   currentTab?: string;
   setCurrentTab?: (tab: string) => void;
   onOpenMovementModal: () => void;
+  onOpenProductModal?: () => void;
   lowStockCount?: number;
   isCollapsed: boolean;
   onCloseMobile: () => void;
@@ -25,6 +27,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({
   onOpenMovementModal,
+  onOpenProductModal,
   lowStockCount = 0,
   isCollapsed,
   onCloseMobile,
@@ -119,21 +122,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {/* Quick Action: Record Stock */}
-        <div className={`p-3 ${isCollapsed ? 'flex justify-center' : ''}`}>
+        {/* Quick Actions: Record Stock & Add Product */}
+        <div className={`p-3 space-y-1.5 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
           <button
             onClick={() => {
               onOpenMovementModal();
               onCloseMobile();
             }}
             title="Record Stock Movement"
-            className={`flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold text-xs transition-all shadow-md shadow-blue-500/25 active:scale-95 ${
-              isCollapsed ? 'w-10 h-10 p-0' : 'w-full py-2.5 px-3'
+            className={`flex items-center justify-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-sm active:scale-95 ${
+              isCollapsed ? 'w-10 h-10 p-0' : 'w-full py-2 px-3'
             }`}
           >
-            <PlusCircle className="w-4 h-4 shrink-0" />
+            <PlusCircle className="w-3.5 h-3.5 shrink-0" />
             {!isCollapsed && <span>Record Movement</span>}
           </button>
+
+          {isOwner && onOpenProductModal && (
+            <button
+              onClick={() => {
+                onOpenProductModal();
+                onCloseMobile();
+              }}
+              title="Add New Product"
+              className={`flex items-center justify-center gap-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 font-medium text-xs transition active:scale-95 ${
+                isCollapsed ? 'w-10 h-10 p-0' : 'w-full py-2 px-3'
+              }`}
+            >
+              <Plus className="w-3.5 h-3.5 shrink-0 text-blue-400" />
+              {!isCollapsed && <span>Add Product</span>}
+            </button>
+          )}
         </div>
 
         {/* Navigation Sections */}

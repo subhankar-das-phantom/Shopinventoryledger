@@ -85,7 +85,8 @@ export const productController = {
         const safeRegex = String(search).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
         matchStage.$or = [
           { name: { $regex: safeRegex, $options: 'i' } },
-          { sku: { $regex: safeRegex, $options: 'i' } }
+          { sku: { $regex: safeRegex, $options: 'i' } },
+          { category: { $regex: safeRegex, $options: 'i' } }
         ];
       }
 

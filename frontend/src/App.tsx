@@ -125,6 +125,7 @@ const AppContent: React.FC = () => {
       {/* Responsive Collapsible Sidebar */}
       <Sidebar
         onOpenMovementModal={() => handleOpenMovementModal()}
+        onOpenProductModal={() => handleOpenProductModal()}
         lowStockCount={lowStockCount}
         isCollapsed={isSidebarCollapsed}
         mobileOpen={mobileDrawerOpen}
@@ -138,6 +139,7 @@ const AppContent: React.FC = () => {
           onToggleSidebar={handleToggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
           onOpenMovementModal={() => handleOpenMovementModal()}
+          onOpenProductModal={() => handleOpenProductModal()}
         />
 
         {/* Scrollable Viewport */}

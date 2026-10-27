@@ -134,7 +134,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by product name or SKU..."
+            placeholder="Search by product name, SKU, or category..."
             className="w-full bg-slate-800 border border-slate-700 pl-9 pr-9 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
           />
           {search && (
@@ -203,7 +203,31 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
             <Package className="w-10 h-10 text-slate-600 mb-3" />
             <div className="font-medium text-slate-300 text-base">No products found</div>
             <div className="text-xs text-slate-500 mt-1 max-w-sm">
-              No products match your current search and filters. Try adjusting your filter terms or add a new product.
+              No products match your current search and filters. Try adjusting your search query, selecting another category, or add a new product.
+            </div>
+            <div className="flex items-center gap-3 mt-4">
+              {(search || selectedCategory !== 'all' || selectedStatus !== 'active') && (
+                <button
+                  onClick={() => {
+                    setSearch('');
+                    flushSearch();
+                    setSelectedCategory('all');
+                    setSelectedStatus('active');
+                  }}
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
+                >
+                  Clear Filters
+                </button>
+              )}
+              {isOwner && (
+                <button
+                  onClick={() => onOpenProductModal()}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white transition shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Product</span>
+                </button>
+              )}
             </div>
           </div>
         ) : (

@@ -25,6 +25,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [price, setPrice] = useState('0');
   const [lowStockThreshold, setLowStockThreshold] = useState('5');
 
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +47,34 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         setPrice('0');
         setLowStockThreshold('5');
       }
+
+      // Fetch distinct categories from catalog to populate smart suggestions
+      api.get('/products?limit=1')
+        .then((res) => {
+          const fetched = res.data.categories || [];
+          const defaults = [
+            'Grains & Cereals',
+            'Cooking Oils & Ghee',
+            'Pulses & Lentils',
+            'Spices & Masalas',
+            'Dairy & Refrigerated',
+            'Beverages & Tea',
+            'Packaged Snacks',
+            'Household Essentials'
+          ];
+          const combined = Array.from(new Set([...fetched, ...defaults]));
+          setAvailableCategories(combined);
+        })
+        .catch(() => {
+          setAvailableCategories([
+            'Grains & Cereals',
+            'Cooking Oils & Ghee',
+            'Pulses & Lentils',
+            'Spices & Masalas',
+            'Dairy & Refrigerated',
+            'Beverages & Tea'
+          ]);
+        });
     }
   }, [isOpen, productToEdit]);
 
@@ -173,35 +202,89 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </div>
 
           {/* Category & Unit */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                Category <span className="text-rose-400">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-medium text-slate-300">
+                  Category <span className="text-rose-400">*</span>
+                </label>
+                <span className="text-[10px] text-slate-500">Pick or type custom</span>
+              </div>
               <input
                 type="text"
+                list="category-suggestions"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 required
-                placeholder="e.g. Dairy, Bakery"
+                placeholder="e.g. Dairy, Spices, Grains"
                 maxLength={80}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
               />
+              <datalist id="category-suggestions">
+                {availableCategories.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+
+              {/* Quick Category Chips */}
+              <div className="flex flex-wrap gap-1 mt-1.5 max-h-16 overflow-y-auto">
+                {availableCategories.slice(0, 6).map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCategory(c)}
+                    className={`px-1.5 py-0.5 rounded text-[10px] transition-colors border ${
+                      category.toLowerCase() === c.toLowerCase()
+                        ? 'bg-blue-500/20 text-blue-300 border-blue-500/40 font-semibold'
+                        : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                Unit of Measure <span className="text-rose-400">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-medium text-slate-300">
+                  Unit of Measure <span className="text-rose-400">*</span>
+                </label>
+                <span className="text-[10px] text-slate-500">Pick or type custom</span>
+              </div>
               <input
                 type="text"
+                list="unit-suggestions"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 required
-                placeholder="e.g. pcs, pack, kg"
+                placeholder="e.g. kg, L, pcs, pack"
                 maxLength={20}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
               />
+              <datalist id="unit-suggestions">
+                {['kg', 'g', 'L', 'mL', 'pcs', 'pack', 'box', 'bottle'].map((u) => (
+                  <option key={u} value={u} />
+                ))}
+              </datalist>
+
+              {/* Quick Unit Chips */}
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {['kg', 'L', 'pcs', 'pack', 'g', 'box'].map((u) => (
+                  <button
+                    key={u}
+                    type="button"
+                    onClick={() => setUnit(u)}
+                    className={`px-1.5 py-0.5 rounded text-[10px] transition-colors border ${
+                      unit.toLowerCase() === u.toLowerCase()
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-semibold'
+                        : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
+                    }`}
+                  >
+                    {u}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 

@@ -6,6 +6,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   PlusCircle,
+  Plus,
   LogOut,
   Calendar,
   ChevronRight
@@ -16,6 +17,7 @@ interface HeaderProps {
   onToggleSidebar: () => void;
   isSidebarCollapsed: boolean;
   onOpenMovementModal: () => void;
+  onOpenProductModal?: () => void;
   selectedProductName?: string;
 }
 
@@ -23,9 +25,10 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
   isSidebarCollapsed,
   onOpenMovementModal,
+  onOpenProductModal,
   selectedProductName
 }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, isOwner } = useAuth();
   const location = useLocation();
 
   const formattedDate = new Date().toLocaleDateString('en-IN', {
@@ -93,12 +96,25 @@ export const Header: React.FC<HeaderProps> = ({
           <span>{formattedDate}</span>
         </div>
 
+        {/* Owner Quick Action: Add Product */}
+        {isOwner && onOpenProductModal && (
+          <button
+            onClick={onOpenProductModal}
+            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium transition active:scale-95"
+            title="Add New Product"
+          >
+            <Plus className="w-3.5 h-3.5 text-blue-400" />
+            <span className="hidden sm:inline">Add Product</span>
+          </button>
+        )}
+
         {/* Record Stock Button */}
         <button
           onClick={onOpenMovementModal}
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-md shadow-blue-500/25 active:scale-95"
+          className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 shadow-sm"
+          title="Record Stock Movement"
         >
-          <PlusCircle className="w-4 h-4" />
+          <PlusCircle className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Record Stock</span>
         </button>
 
