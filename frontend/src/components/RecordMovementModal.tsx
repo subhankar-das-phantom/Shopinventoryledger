@@ -234,6 +234,7 @@ export const RecordMovementModal: React.FC<RecordMovementModalProps> = ({
 
       if (res.data.success) {
         setSuccessMessage(`Movement recorded! New stock: ${res.data.data.currentStock} ${selectedProduct?.unit || 'units'}`);
+        window.dispatchEvent(new CustomEvent('catalog-updated'));
         // Remain permanently locked while displaying success message
         setTimeout(() => {
           onSuccess();

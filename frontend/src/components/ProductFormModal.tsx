@@ -120,6 +120,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         });
       }
 
+      window.dispatchEvent(new CustomEvent('catalog-updated'));
       onSuccess();
       onClose();
     } catch (err: any) {

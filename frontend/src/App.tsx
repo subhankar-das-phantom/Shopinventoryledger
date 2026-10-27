@@ -120,6 +120,14 @@ const AppContent: React.FC = () => {
     }
   };
 
+  // Global catalog refresh trigger version counter
+  const [catalogRefreshTrigger, setCatalogRefreshTrigger] = useState<number>(0);
+  const triggerCatalogRefresh = () => {
+    setCatalogRefreshTrigger((prev) => prev + 1);
+    fetchLowStockCount();
+    window.dispatchEvent(new CustomEvent('catalog-updated'));
+  };
+
   return (
     <div className="min-h-screen bg-[#09090b] text-slate-100 flex overflow-hidden">
       {/* Responsive Collapsible Sidebar */}
@@ -164,6 +172,7 @@ const AppContent: React.FC = () => {
                     onSelectProduct={(productId) => navigate(`/products/${productId}`)}
                     onOpenProductModal={handleOpenProductModal}
                     onOpenMovementModal={handleOpenMovementModal}
+                    refreshTrigger={catalogRefreshTrigger}
                   />
                 }
               />
@@ -197,9 +206,7 @@ const AppContent: React.FC = () => {
       <RecordMovementModal
         isOpen={movementModalOpen}
         onClose={() => setMovementModalOpen(false)}
-        onSuccess={() => {
-          fetchLowStockCount();
-        }}
+        onSuccess={triggerCatalogRefresh}
         initialType={movementModalType}
         initialProductId={movementModalProductId}
       />
@@ -207,9 +214,7 @@ const AppContent: React.FC = () => {
       <ProductFormModal
         isOpen={productModalOpen}
         onClose={() => setProductModalOpen(false)}
-        onSuccess={() => {
-          fetchLowStockCount();
-        }}
+        onSuccess={triggerCatalogRefresh}
         productToEdit={productToEdit}
       />
     </div>

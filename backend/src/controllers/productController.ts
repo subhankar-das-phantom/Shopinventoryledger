@@ -93,7 +93,7 @@ export const productController = {
 
       const skip = (Number(page) - 1) * Number(limit);
 
-      const [products, totalCount, categories] = await Promise.all([
+      const [products, totalCount, categoriesRaw, statsAgg] = await Promise.all([
         Product.aggregate([
           { $match: matchStage },
           { $sort: { createdAt: -1 } },
@@ -126,8 +126,58 @@ export const productController = {
           }
         ]),
         Product.countDocuments(matchStage),
-        Product.distinct('category')
+        Product.distinct('category'),
+        Product.aggregate([
+          { $match: { isActive: true } },
+          {
+            $lookup: {
+              from: 'stockbalances',
+              localField: '_id',
+              foreignField: 'productId',
+              as: 'balance'
+            }
+          },
+          {
+            $project: {
+              currentStock: { $ifNull: [{ $arrayElemAt: ['$balance.currentStock', 0] }, 0] },
+              lowStockThreshold: 1,
+              price: 1
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              totalCount: { $sum: 1 },
+              totalValuation: { $sum: { $multiply: ['$currentStock', '$price'] } },
+              lowStockCount: {
+                $sum: {
+                  $cond: [
+                    { $and: [{ $gt: ['$currentStock', 0] }, { $lte: ['$currentStock', '$lowStockThreshold'] }] },
+                    1,
+                    0
+                  ]
+                }
+              },
+              outOfStockCount: {
+                $sum: {
+                  $cond: [{ $eq: ['$currentStock', 0] }, 1, 0]
+                }
+              }
+            }
+          }
+        ])
       ]);
+
+      const stats = statsAgg[0] || {
+        totalCount: totalCount,
+        totalValuation: 0,
+        lowStockCount: 0,
+        outOfStockCount: 0
+      };
+
+      const categories = (categoriesRaw as string[])
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b));
 
       res.status(200).json({
         success: true,
@@ -138,7 +188,13 @@ export const productController = {
           total: totalCount,
           totalPages: Math.ceil(totalCount / Number(limit))
         },
-        categories
+        categories,
+        stats: {
+          totalProducts: stats.totalCount || 0,
+          totalValuation: Math.round(stats.totalValuation || 0),
+          lowStockCount: stats.lowStockCount || 0,
+          outOfStockCount: stats.outOfStockCount || 0
+        }
       });
     } catch (error) {
       next(error);
